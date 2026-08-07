@@ -1,0 +1,8 @@
+{
+  "admin/services/wificalling-gateway": {
+    "title": "Wi-Fi Calling Gateway",
+    "order": 70,
+    "action": { "type": "view", "path": "wificalling-gateway/overview" },
+    "depends": { "acl": [ "luci-app-wificalling-gateway" ] }
+  }
+}

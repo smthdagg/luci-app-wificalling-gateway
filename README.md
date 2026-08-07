@@ -1,0 +1,60 @@
+# Wi-Fi Calling Gateway
+
+[English](README_EN.md) · [安装](docs/zh-CN/INSTALL.md) · [配置](docs/zh-CN/CONFIGURATION.md) · [编译](docs/zh-CN/BUILD.md) · [排错](docs/zh-CN/TROUBLESHOOTING.md)
+
+面向 OpenWrt / ImmortalWrt 的独立 LuCI 插件。它把指定局域网设备通过指定的 sing-box 节点转发，同时让其他设备继续遵循原网关或 PassWall 策略，并观察 Wi‑Fi Calling 常用的 ePDG/IPsec UDP 500、4500 会话证据。
+
+![节点与常规设置](docs/images/overview.png)
+
+![设备策略与状态检测](docs/images/device-status.png)
+
+## v1.0 功能
+
+- 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket。
+- 每台设备可绑定一个节点；一个策略可包含多个固定私网 IPv4 地址。
+- `独立通道`：绕过 PassWall，使用插件节点；`跟随网关`：插件不拦截。
+- 单个 sing-box 进程、nftables TPROXY、TCP 与 UDP 透明转发。
+- 节点 ICMP/TCP 可达性与延迟检测。
+- 观察 UDP 500/4500，显示 `no_session`、`negotiating`、`nat_t_seen`、`likely_registered`、`active_traffic`。
+- 启动前执行 `sing-box check`；配置和运行时凭据权限设为 `0600`。
+
+## 支持环境
+
+| 项目 | v1.0 支持范围 |
+|---|---|
+| 固件 | OpenWrt / ImmortalWrt，firewall4 + nftables |
+| 已实机验证 | ImmortalWrt 24.10.6，Redmi AX6S，aarch64_cortex-a53 |
+| sing-box | 建议 1.13.0 或更高版本 |
+| LuCI | JavaScript 视图（现代 LuCI） |
+| 网络 | IPv4 LAN 策略；设备必须使用 DHCP 静态租约 |
+| 包架构 | `all`（Shell 与 LuCI 资源）；运行能力取决于目标 sing-box 包 |
+
+依赖：`luci-base`、`sing-box`、`firewall4`、`kmod-nft-tproxy`、`kmod-nft-socket`、`ip-full`、`tcping`。
+
+## 快速安装
+
+从 [Releases](../../releases) 下载 `luci-app-wificalling-gateway_1.0.0-1_all.ipk`，上传到路由器后执行：
+
+```sh
+opkg update
+opkg install ./luci-app-wificalling-gateway_1.0.0-1_all.ipk
+/etc/init.d/rpcd restart
+```
+
+然后进入 **服务 → Wi‑Fi Calling Gateway**。先添加并保存节点，再添加设备策略。详细步骤见[安装说明](docs/zh-CN/INSTALL.md)和[配置说明](docs/zh-CN/CONFIGURATION.md)。
+
+## 重要边界
+
+本插件只提供网络转发和可观察证据，不修改手机定位、运营商账户、IMS 配置或紧急呼叫地址。`likely_registered` 仅表示观察到双向 `ASSURED` UDP 4500；Wi‑Fi Calling 图标、UDP 500/4500 或高流量均不能单独证明号码已激活或电话一定能接通。请遵守运营商条款和所在地法律，并在真实设备上完成通话验证。
+
+## 项目文档
+
+- [安装与升级](docs/zh-CN/INSTALL.md)
+- [节点、设备和 PassWall 配置](docs/zh-CN/CONFIGURATION.md)
+- [SDK / 源码编译](docs/zh-CN/BUILD.md)
+- [常见问题与排错](docs/zh-CN/TROUBLESHOOTING.md)
+- [安全策略](SECURITY.md) · [参与贡献](CONTRIBUTING.md) · [更新记录](CHANGELOG.md)
+
+## 许可证
+
+[MIT](LICENSE)。本项目与 Apple、任何移动运营商、OpenWrt、ImmortalWrt、sing-box 或 PassWall 均无隶属关系。

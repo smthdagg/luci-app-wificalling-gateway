@@ -1,0 +1,7 @@
+config global 'main'
+	option enabled '0'
+	option log_level 'warn'
+	option monitor_interval '5'
+
+# Add nodes and device policies in LuCI. Secrets are intentionally not included.
+# Reserve each client address with static DHCP before enabling a policy.

@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+dist/*
+!dist/.gitkeep
+*.ipk
+*.tar.gz
+*.sha256
+*.bak
+*.backup
+*.uci
+*.conf.local

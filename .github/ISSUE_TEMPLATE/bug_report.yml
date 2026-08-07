@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a reproducible problem without exposing credentials
+body:
+  - type: markdown
+    attributes:
+      value: "Remove credentials, node URIs, public IPs, router backups, and runtime sing-box JSON before submitting."
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware and version
+    validations:
+      required: true
+  - type: input
+    id: singbox
+    attributes:
+      label: sing-box version
+    validations:
+      required: true
+  - type: dropdown
+    id: protocol
+    attributes:
+      label: Protocol
+      options: [AnyTLS, Hysteria2, TUIC, VLESS Reality, VMess WebSocket]
+  - type: textarea
+    id: steps
+    attributes:
+      label: Sanitized reproduction steps and logs
+    validations:
+      required: true

@@ -1,0 +1,34 @@
+# 配置说明
+
+## 节点
+
+先点“添加代理节点”，填写显示名称、协议、服务器和协议必需字段。AnyTLS/Hysteria2 使用密码；TUIC 使用 UUID 和密码；VLESS Reality 使用 UUID、flow、SNI、公钥、short ID 和指纹；VMess WS 使用 UUID、Host 和路径。TLS 公钥指纹必须是 Base64 SHA-256，而不是十六进制文本。
+
+节点状态只检测 ICMP，TCP 型协议失败时会用 `tcping` 探测端口。它不执行完整代理握手。UDP 型节点显示 `no_icmp_reply` 不能直接判定离线。
+
+## 设备策略
+
+1. 在 DHCP 中为手机保留固定 IPv4。
+2. 添加设备，填写易识别的名称。
+3. 每个输入项填写一个私网 IPv4；一个策略可放多台使用同一节点的设备。
+4. 选择路由模式：
+   - **独立通道**：该 IP 绕过 PassWall，通过所选插件节点。
+   - **跟随网关**：插件不处理该 IP，继续使用路由器默认和 PassWall 规则。
+
+同一个 IP 不可同时属于两个独立策略。v1.0 不拦截 IPv6；若需要严格单路径测试，应在设备/网络侧正确处理 IPv6，不能把未代理 IPv6 误认为插件已覆盖。
+
+## 状态含义
+
+| 状态 | 含义 |
+|---|---|
+| `no_session` | 未观察到相关会话 |
+| `negotiating` | 观察到 UDP 500 |
+| `nat_t_seen` | 观察到 UDP 4500 |
+| `likely_registered` | UDP 4500 为双向 `ASSURED` |
+| `active_traffic` | 双向 `ASSURED` 且包量较高 |
+
+这些是路由器侧网络证据，不是运营商激活结论。
+
+## 与 PassWall 共存
+
+独立设备运行时，插件在 PassWall 的 `PSW_MANGLE` 与 `PSW_NAT` 中临时插入带 `WFC_GATEWAY_BYPASS` 注释的 return 规则。PassWall 重载后监控进程会恢复这些规则；插件停止时会删除。不要另外建立重复 ACL。
