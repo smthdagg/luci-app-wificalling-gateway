@@ -2,7 +2,7 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
-version=${1:-1.0.0-1}
+version=${1:-1.0.1-1}
 out="$root/dist/luci-app-wificalling-gateway_${version}_all.ipk"
 stage=$(mktemp -d "${TMPDIR:-/tmp}/wfc-ipk.XXXXXX")
 trap 'rm -rf "$stage"' EXIT HUP INT TERM

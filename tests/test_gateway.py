@@ -199,9 +199,9 @@ class PackageTests(unittest.TestCase):
     def test_release_metadata_and_runtime_dependencies(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         builder = (ROOT / "scripts/build-ipk.sh").read_text(encoding="utf-8")
-        self.assertIn("PKG_VERSION:=1.0.0", makefile)
+        self.assertIn("PKG_VERSION:=1.0.1", makefile)
         self.assertIn("+tcping", makefile)
-        self.assertIn("version=${1:-1.0.0-1}", builder)
+        self.assertIn("version=${1:-1.0.1-1}", builder)
         self.assertIn("tcping", builder)
 
     def test_public_project_documentation_exists(self):
@@ -239,6 +239,14 @@ class PackageTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("secret.password = true", source)
         self.assertIn("secret.textvalue = function", source)
+
+    def test_luci_acl_allows_ubus_file_reads_for_runtime_status(self):
+        acl = json.loads(
+            (ROOT / "root/usr/share/rpcd/acl.d/luci-app-wificalling-gateway.json")
+            .read_text(encoding="utf-8")
+        )["luci-app-wificalling-gateway"]["read"]
+        self.assertEqual(acl["ubus"]["file"], ["read"])
+        self.assertIn("/var/run/wificalling-gateway/status.json", acl["file"])
 
     def test_luci_explains_names_device_ips_and_node_refresh(self):
         source = (
