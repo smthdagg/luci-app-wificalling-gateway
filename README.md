@@ -43,11 +43,11 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.1.0）：
+从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.1.1）：
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.1.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.1.1-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 

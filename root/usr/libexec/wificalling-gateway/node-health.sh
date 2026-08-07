@@ -38,6 +38,6 @@ json_escape() {
 	done < "$nodes"
 	printf ']}\n'
 } > "$tmp"
-chmod 600 "$tmp"
+chmod 644 "$tmp"
 mv "$tmp" "$output"
 trap - EXIT HUP INT TERM

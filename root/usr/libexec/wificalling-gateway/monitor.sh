@@ -75,7 +75,8 @@ END {
 cat "$event_tmp" >> "$events"
 tail -n 100 "$events" > "$trim_tmp"
 mv "$trim_tmp" "$events"
-chmod 600 "$tmp" "$state_tmp" "$events"
+chmod 644 "$tmp" "$events"
+chmod 600 "$state_tmp"
 mv "$state_tmp" "$state"
 mv "$tmp" "$output"
 trap - EXIT HUP INT TERM
