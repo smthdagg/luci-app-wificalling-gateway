@@ -260,6 +260,58 @@ class NodeHealthTests(unittest.TestCase):
 
 
 class PackageTests(unittest.TestCase):
+    def parse_node_uri(self, uri):
+        parser = ROOT / "htdocs/luci-static/resources/wificalling-gateway/node-import.js"
+        runner = (
+            "const fs=require('fs');"
+            "const mod=new Function(fs.readFileSync(process.argv[1],'utf8'))();"
+            "process.stdout.write(JSON.stringify(mod.parse(process.argv[2])));"
+        )
+        result = subprocess.run(
+            ["node", "-e", runner, str(parser), uri],
+            text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
+    def test_imports_common_proxy_uri_formats(self):
+        anytls = self.parse_node_uri(
+            "anytls://demo-secret@hk.example.com:7001?peer=cdn.example.com&insecure=1&udp=1&fingerprint=chrome#Hong%20Kong"
+        )
+        self.assertEqual((anytls["protocol"], anytls["label"], anytls["server"], anytls["port"]), ("anytls", "Hong Kong", "hk.example.com", "7001"))
+        self.assertEqual(anytls["password"], "demo-secret")
+        self.assertEqual(anytls["sni"], "cdn.example.com")
+        self.assertEqual(anytls["udp"], "1")
+
+        hy2 = self.parse_node_uri("hy2://hy-secret@hy.example.com:443?sni=hy-sni.example&alpn=h3&insecure=1#HY2")
+        self.assertEqual(hy2["protocol"], "hysteria2")
+        self.assertEqual(hy2["password"], "hy-secret")
+        self.assertEqual(hy2["alpn"], "h3")
+
+        tuic = self.parse_node_uri("tuic://demo-uuid:demo-pass@tuic.example.com:10443?sni=tuic-sni.example&congestion_control=bbr&udp_relay_mode=native#TUIC")
+        self.assertEqual(tuic["uuid"], "demo-uuid")
+        self.assertEqual(tuic["password"], "demo-pass")
+        self.assertEqual(tuic["udp_mode"], "native")
+
+        vless = self.parse_node_uri("vless://demo-uuid@vl.example.com:443?security=reality&sni=apple.com&flow=xtls-rprx-vision&pbk=demo-public&sid=abcd&fp=chrome&type=tcp#VLESS")
+        self.assertEqual(vless["public_key"], "demo-public")
+        self.assertEqual(vless["short_id"], "abcd")
+        self.assertEqual(vless["fingerprint"], "chrome")
+
+        vmess_payload = json.dumps({"v":"2","ps":"VMess WS","add":"vm.example.com","port":"8080","id":"demo-uuid","aid":"0","net":"ws","path":"/demo","host":"cdn.example.com","tls":""})
+        import base64
+        vmess = self.parse_node_uri("vmess://" + base64.b64encode(vmess_payload.encode()).decode())
+        self.assertEqual(vmess["protocol"], "vmess")
+        self.assertEqual(vmess["transport"], "ws")
+        self.assertEqual(vmess["path"], "/demo")
+
+    def test_settings_page_exposes_paste_import_without_logging_uri(self):
+        source = (ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/overview.js").read_text(encoding="utf-8")
+        self.assertIn("Import node link", source)
+        self.assertIn("nodeImport.parse", source)
+        self.assertIn("uci.add", source)
+        self.assertNotIn("console.log", source)
+
     def test_release_metadata_and_runtime_dependencies(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         builder = (ROOT / "scripts/build-ipk.sh").read_text(encoding="utf-8")
