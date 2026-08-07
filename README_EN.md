@@ -4,9 +4,11 @@
 
 A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes selected LAN clients through selected sing-box outbounds while leaving other clients on the normal gateway or PassWall policy. It also reports observable ePDG/IPsec UDP 500/4500 evidence commonly associated with Wi-Fi Calling.
 
-![Node and general settings](docs/images/overview.png)
+> The following two sanitized screenshots show an earlier interface. v1.2 separates settings, live status, and activity history into dedicated pages.
 
-![Device policies and status](docs/images/device-status.png)
+![Earlier node and general settings interface](docs/images/overview.png)
+
+![Earlier device policies and status interface](docs/images/device-status.png)
 
 ### Observed on a real iPhone
 
@@ -18,19 +20,21 @@ The following screenshot shows **EE WiFiCall** displayed on an actual iPhone whi
 
 This demonstrates the Wi-Fi Calling registration indicator on the device. Carrier activation and calling capability must still be confirmed by a completed call or by the carrier.
 
-## v1.0 features
+## v1.2 features
 
 - AnyTLS, Hysteria2, TUIC, VLESS Reality and VMess WebSocket outbounds.
 - One selected node per device policy; multiple fixed private IPv4 addresses per policy.
 - **Independent tunnel** bypasses PassWall and uses the plugin node; **Follow gateway** is not intercepted.
 - One sing-box process, nftables TPROXY, transparent TCP and UDP routing.
 - ICMP/TCP reachability and latency observations.
-- UDP 500/4500 states: `no_session`, `negotiating`, `nat_t_seen`, `likely_registered`, `active_traffic`.
+- Separate LuCI pages for settings, live Wi-Fi Calling status, and encrypted IMS activity.
+- UDP 500/4500 evidence with registration state, ePDG, ASSURED, packet totals, and last activity.
+- Activity history capped at 100 records with automatic refresh, record count, and confirmation-protected clearing.
 - `sing-box check` before startup and mode `0600` for credential-bearing files.
 
 ## Compatibility
 
-| Component | v1.0 support |
+| Component | v1.2 support |
 |---|---|
 | Firmware | OpenWrt / ImmortalWrt with firewall4 and nftables |
 | Hardware tested | ImmortalWrt 24.10.6, Redmi AX6S, aarch64_cortex-a53 |

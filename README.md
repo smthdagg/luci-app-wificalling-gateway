@@ -4,9 +4,11 @@
 
 面向 OpenWrt / ImmortalWrt 的独立 LuCI 插件。它把指定局域网设备通过指定的 sing-box 节点转发，同时让其他设备继续遵循原网关或 PassWall 策略，并观察 Wi‑Fi Calling 常用的 ePDG/IPsec UDP 500、4500 会话证据。
 
-![节点与常规设置](docs/images/overview.png)
+> 以下两张为早期界面实测截图，敏感字段已经脱敏。v1.2 已将设置、状态和活动日志拆分为独立页面。
 
-![设备策略与状态检测](docs/images/device-status.png)
+![早期节点与常规设置界面](docs/images/overview.png)
+
+![早期设备策略与状态检测界面](docs/images/device-status.png)
 
 ### iPhone 实机观察
 
@@ -18,19 +20,21 @@
 
 该截图证明终端已显示 Wi‑Fi Calling 注册状态；是否完成号码激活及呼叫能力，仍应以实际通话或运营商确认结果为准。
 
-## v1.0 功能
+## v1.2 功能
 
 - 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket。
 - 每台设备可绑定一个节点；一个策略可包含多个固定私网 IPv4 地址。
 - `独立通道`：绕过 PassWall，使用插件节点；`跟随网关`：插件不拦截。
 - 单个 sing-box 进程、nftables TPROXY、TCP 与 UDP 透明转发。
 - 节点 ICMP/TCP 可达性与延迟检测。
-- 观察 UDP 500/4500，显示 `no_session`、`negotiating`、`nat_t_seen`、`likely_registered`、`active_traffic`。
+- 设置、Wi‑Fi Calling 状态、加密 IMS 活动日志分为三个独立管理页面。
+- 观察 UDP 500/4500，显示注册状态、ePDG、ASSURED、包计数及最后活动时间。
+- 活动日志最多保留最近 100 条，支持自动刷新、记录计数及二次确认后清空。
 - 启动前执行 `sing-box check`；配置和运行时凭据权限设为 `0600`。
 
 ## 支持环境
 
-| 项目 | v1.0 支持范围 |
+| 项目 | v1.2 支持范围 |
 |---|---|
 | 固件 | OpenWrt / ImmortalWrt，firewall4 + nftables |
 | 已实机验证 | ImmortalWrt 24.10.6，Redmi AX6S，aarch64_cortex-a53 |

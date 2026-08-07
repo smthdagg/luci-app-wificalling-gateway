@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 - 2026-08-07
+
+- Split configuration, live Wi-Fi Calling status, and encrypted IMS activity into separate LuCI pages.
+- Added automatic activity refresh, record count, and confirmation-protected log clearing.
+- Restricted log write access to this plugin's activity file only.
+
+## 1.1.1 - 2026-08-07
+
+- Fixed LuCI runtime file access on OpenWrt systems where `/var/run` resolves to `/tmp/run`.
+- Kept credential-bearing configuration private while exposing only non-secret monitoring data.
+
 ## 1.1.0 - 2026-08-07
 
 - Integrated node alive state, measured latency, and quality bands directly into the Proxy nodes grid.
