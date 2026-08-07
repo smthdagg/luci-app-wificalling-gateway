@@ -1,4 +1,5 @@
 'use strict';
+'require baseclass';
 
 function decodeLabel(value) {
 	try { return decodeURIComponent(value || ''); } catch (e) { return value || ''; }
@@ -78,4 +79,4 @@ function parse(uri) {
 	return parseUrl(value, scheme);
 }
 
-return { parse: parse };
+return baseclass.extend({ parse: parse });

@@ -58,7 +58,7 @@ Download the latest stable IPK from [Releases](../../releases) (currently 1.3.0)
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.3.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.3.0-2_all.ipk
 /etc/init.d/rpcd restart
 ```
 

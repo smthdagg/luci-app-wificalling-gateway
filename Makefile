@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-wificalling-gateway
 PKG_VERSION:=1.3.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=Wi-Fi Calling Gateway contributors

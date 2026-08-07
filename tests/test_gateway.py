@@ -321,7 +321,8 @@ class PackageTests(unittest.TestCase):
         builder = (ROOT / "scripts/build-ipk.sh").read_text(encoding="utf-8")
         self.assertIn("PKG_VERSION:=1.3.0", makefile)
         self.assertIn("+tcping", makefile)
-        self.assertIn("version=${1:-1.3.0-1}", builder)
+        self.assertIn("PKG_RELEASE:=2", makefile)
+        self.assertIn("version=${1:-1.3.0-2}", builder)
         self.assertIn("tcping", builder)
 
     def test_public_project_documentation_exists(self):
