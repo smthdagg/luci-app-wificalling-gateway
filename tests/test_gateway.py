@@ -264,7 +264,8 @@ class PackageTests(unittest.TestCase):
         parser = ROOT / "htdocs/luci-static/resources/wificalling-gateway/node-import.js"
         runner = (
             "const fs=require('fs');"
-            "const mod=new Function(fs.readFileSync(process.argv[1],'utf8'))();"
+            "const baseclass={extend:o=>o};"
+            "const mod=new Function('baseclass',fs.readFileSync(process.argv[1],'utf8'))(baseclass);"
             "process.stdout.write(JSON.stringify(mod.parse(process.argv[2])));"
         )
         result = subprocess.run(
@@ -306,7 +307,10 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(vmess["path"], "/demo")
 
     def test_settings_page_exposes_paste_import_without_logging_uri(self):
+        parser = (ROOT / "htdocs/luci-static/resources/wificalling-gateway/node-import.js").read_text(encoding="utf-8")
         source = (ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/overview.js").read_text(encoding="utf-8")
+        self.assertIn("'require baseclass'", parser)
+        self.assertIn("return baseclass.extend", parser)
         self.assertIn("Import node link", source)
         self.assertIn("nodeImport.parse", source)
         self.assertIn("uci.add", source)
