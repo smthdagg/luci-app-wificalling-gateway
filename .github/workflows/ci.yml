@@ -23,6 +23,6 @@ jobs:
       - name: Shell syntax
         run: for f in root/etc/init.d/wificalling-gateway root/usr/libexec/wificalling-gateway/*.sh scripts/*.sh; do sh -n "$f"; done
       - name: LuCI JavaScript syntax
-        run: node --check htdocs/luci-static/resources/view/wificalling-gateway/overview.js
+        run: for f in htdocs/luci-static/resources/view/wificalling-gateway/*.js; do node --check "$f"; done
       - name: Build package
-        run: ./scripts/build-ipk.sh 1.1.0-1
+        run: ./scripts/build-ipk.sh 1.2.0-1
