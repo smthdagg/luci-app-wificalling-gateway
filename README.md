@@ -8,6 +8,16 @@
 
 ![设备策略与状态检测](docs/images/device-status.png)
 
+### iPhone 实机观察
+
+下图为实际 iPhone 在飞行模式及 Wi‑Fi 环境中显示 **EE WiFiCall** 的状态：
+
+<p align="center">
+  <img src="docs/images/iphone-ee-wificall.jpg" alt="iPhone 实机显示 EE WiFiCall" width="420">
+</p>
+
+该截图证明终端已显示 Wi‑Fi Calling 注册状态；是否完成号码激活及呼叫能力，仍应以实际通话或运营商确认结果为准。
+
 ## v1.0 功能
 
 - 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket。

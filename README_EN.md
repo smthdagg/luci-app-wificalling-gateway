@@ -8,6 +8,16 @@ A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes s
 
 ![Device policies and status](docs/images/device-status.png)
 
+### Observed on a real iPhone
+
+The following screenshot shows **EE WiFiCall** displayed on an actual iPhone while it is using Wi-Fi in airplane mode:
+
+<p align="center">
+  <img src="docs/images/iphone-ee-wificall.jpg" alt="EE WiFiCall displayed on a real iPhone" width="420">
+</p>
+
+This demonstrates the Wi-Fi Calling registration indicator on the device. Carrier activation and calling capability must still be confirmed by a completed call or by the carrier.
+
 ## v1.0 features
 
 - AnyTLS, Hysteria2, TUIC, VLESS Reality and VMess WebSocket outbounds.
