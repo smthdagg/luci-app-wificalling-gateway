@@ -13,6 +13,13 @@
         "/tmp/run/wificalling-gateway/events.log": [ "read" ]
       }
     },
-    "write": { "uci": [ "wificalling-gateway" ] }
+    "write": {
+      "uci": [ "wificalling-gateway" ],
+      "ubus": { "file": [ "write" ] },
+      "file": {
+        "/var/run/wificalling-gateway/events.log": [ "write" ],
+        "/tmp/run/wificalling-gateway/events.log": [ "write" ]
+      }
+    }
   }
 }

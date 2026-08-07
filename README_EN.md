@@ -43,11 +43,11 @@ Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft
 
 ## Quick install
 
-Download the latest stable IPK from [Releases](../../releases) (currently 1.1.1), upload it to the router, then run:
+Download the latest stable IPK from [Releases](../../releases) (currently 1.2.0), upload it to the router, then run:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.1.1-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.2.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 

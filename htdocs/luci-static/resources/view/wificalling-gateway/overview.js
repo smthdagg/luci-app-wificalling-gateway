@@ -9,17 +9,13 @@
 return view.extend({
 	load: function() {
 		return Promise.all([
-			L.resolveDefault(fs.read('/var/run/wificalling-gateway/status.json'), '{}'),
 			L.resolveDefault(fs.read('/var/run/wificalling-gateway/node-status.json'), '{}'),
-			L.resolveDefault(fs.read('/var/run/wificalling-gateway/events.log'), ''),
 			uci.load('wificalling-gateway')
 		]);
 	},
 	render: function(data) {
-		var parsed, nodeParsed;
-		try { parsed = JSON.parse(data[0]); } catch (e) { parsed = { devices: [] }; }
-		try { nodeParsed = JSON.parse(data[1]); } catch (e) { nodeParsed = { nodes: [] }; }
-
+		var nodeParsed;
+		try { nodeParsed = JSON.parse(data[0]); } catch (e) { nodeParsed = { nodes: [] }; }
 		function nodeById(id, source) {
 			var nodes = (source || nodeParsed).nodes || [];
 			for (var i = 0; i < nodes.length; i++) if (nodes[i].id === id) return nodes[i];
@@ -40,44 +36,17 @@ return view.extend({
 			if (n.state === 'unreachable') return _('Offline');
 			return _('Unknown');
 		}
-		function latency(n) {
-			return n && n.ping_ms != null ? n.ping_ms + ' ms (' + n.measurement + ')' : '-';
-		}
-		function when(epoch) {
-			return epoch ? new Date(epoch * 1000).toLocaleString() : '-';
-		}
-		function statusRows(source) {
-			return (source.devices || []).map(function(d) {
-				var ports = (d.ike_seen ? '500' : '-') + ' / ' + (d.nat_t_seen ? '4500' : '-');
-				var packets = d.sent_packets + ' ↑ / ' + d.reply_packets + ' ↓';
-				return E('tr', { class: 'tr' }, [d.label, d.ip, d.wificalling || d.state,
-					d.epdg_ip || '-', ports, d.assured ? _('Yes') : _('No'), packets,
-					when(d.last_activity), d.activity_evidence || 'none'].map(function(x) {
-					return E('td', { class: 'td' }, String(x));
-				}));
-			});
-		}
-		function eventRows(raw) {
-			var rows = raw.trim() ? raw.trim().split('\n').slice(-30).reverse() : [];
-			return rows.map(function(line) {
-				var f = line.split('|');
-				return E('tr', { class: 'tr' }, [when(Number(f[0])), f[1], f[2], f[7] || '-',
-					f[3], (f[4] || '0') + ' ↑ / ' + (f[5] || '0') + ' ↓', _('Calls/SMS unknown')].map(function(x) {
-					return E('td', { class: 'td' }, String(x));
-				}));
-			});
-		}
+		function latency(n) { return n && n.ping_ms != null ? n.ping_ms + ' ms (' + n.measurement + ')' : '-'; }
 
-		var m = new form.Map('wificalling-gateway', _('Wi-Fi Calling Gateway'),
-			_('Routes selected LAN devices through sing-box. Monitoring shows network evidence, not message or call content.'));
+		var m = new form.Map('wificalling-gateway', _('Wi-Fi Calling Gateway settings'),
+			_('Configure proxy nodes and assign fixed LAN devices. Monitoring and logs are available from the submenu.'));
 		var s = m.section(form.NamedSection, 'main', 'global', _('General'));
 		s.option(form.Flag, 'enabled', _('Enable'));
 		var logLevel = s.option(form.ListValue, 'log_level', _('Log level'));
 		logLevel.value('warn'); logLevel.value('info'); logLevel.value('debug');
 
 		s = m.section(form.GridSection, 'node', _('Proxy nodes'));
-		s.addremove = true; s.nodescriptions = true; s.anonymous = true;
-		s.addbtntitle = _('Add proxy node');
+		s.addremove = true; s.nodescriptions = true; s.anonymous = true; s.addbtntitle = _('Add proxy node');
 		s.sectiontitle = function(id) { return uci.get('wificalling-gateway', id, 'label') || id; };
 		s.option(form.Flag, 'enabled', _('Enable')).default = '1';
 		var nodeLabel = s.option(form.Value, 'label', _('Node display name'));
@@ -112,63 +81,31 @@ return view.extend({
 		s.option(form.Value, 'host', _('WebSocket Host'));
 
 		s = m.section(form.GridSection, 'device', _('Device policies'));
-		s.addremove = true; s.nodescriptions = true; s.anonymous = true;
-		s.addbtntitle = _('Add LAN device');
+		s.addremove = true; s.nodescriptions = true; s.anonymous = true; s.addbtntitle = _('Add LAN device');
 		s.sectiontitle = function(id) { return uci.get('wificalling-gateway', id, 'label') || id; };
 		s.option(form.Flag, 'enabled', _('Enable')).default = '1';
 		var deviceLabel = s.option(form.Value, 'label', _('Device display name'));
 		deviceLabel.rmempty = false; deviceLabel.placeholder = _('Example: iPhone 12');
 		var routeMode = s.option(form.ListValue, 'route_mode', _('Routing mode'));
-		routeMode.value('independent', _('Independent tunnel'));
-		routeMode.value('follow_gateway', _('Follow gateway'));
+		routeMode.value('independent', _('Independent tunnel')); routeMode.value('follow_gateway', _('Follow gateway'));
 		routeMode.default = 'independent';
-		routeMode.description = _('Independent tunnel bypasses PassWall. Follow gateway is not intercepted.');
 		var selectedNode = s.option(form.ListValue, 'node', _('Node'));
 		selectedNode.rmempty = false; selectedNode.depends('route_mode', 'independent');
 		selectedNode.description = _('Save the node first, then reload this page to select it for a device.');
 		uci.sections('wificalling-gateway', 'node').forEach(function(node) { selectedNode.value(node['.name'], node.label || node['.name']); });
 		var ips = s.option(form.DynamicList, 'source_ip', _('LAN IPv4 addresses'));
 		ips.datatype = 'ip4addr'; ips.rmempty = false; ips.placeholder = '192.168.31.189';
-		ips.description = _('Enter one fixed LAN IPv4 address per item. Reserve it in DHCP first.');
-
-		var body = E('tbody', { id: 'wfc-status-body' }, statusRows(parsed));
-		var eventBody = E('tbody', { id: 'wfc-event-body' }, eventRows(data[2]));
-		var status = E('div', { class: 'cbi-section' }, [
-			E('h3', {}, _('Wi-Fi Calling device monitoring')),
-			E('p', {}, _('Registered means an ASSURED bidirectional UDP 4500 tunnel was observed. UDP 500/4500 and packet counts are network evidence.')),
-			E('table', { class: 'table' }, [
-				E('tr', { class: 'tr table-titles' }, [_('Device'), _('IP'), _('Wi-Fi Calling status'), _('ePDG IP'), _('UDP 500/4500'), _('ASSURED'), _('Packets'), _('Last activity'), _('Evidence')].map(function(x) { return E('th', { class: 'th' }, x); })), body
-			])
-		]);
-		var events = E('div', { class: 'cbi-section' }, [
-			E('h3', {}, _('Encrypted IMS activity log')),
-			E('p', {}, _('Calls and SMS cannot be distinguished because IMS traffic is encrypted inside IPsec. This log records only state and packet changes.')),
-			E('table', { class: 'table' }, [
-				E('tr', { class: 'tr table-titles' }, [_('Time'), _('Device'), _('IP'), _('Wi-Fi Calling'), _('Activity'), _('Packet delta'), _('Content')].map(function(x) { return E('th', { class: 'th' }, x); })), eventBody
-			])
-		]);
 
 		poll.add(function() {
-			return Promise.all([
-				L.resolveDefault(fs.read('/var/run/wificalling-gateway/status.json'), '{}'),
-				L.resolveDefault(fs.read('/var/run/wificalling-gateway/node-status.json'), '{}'),
-				L.resolveDefault(fs.read('/var/run/wificalling-gateway/events.log'), '')
-			]).then(function(raw) {
-				var current, currentNodes;
-				try { current = JSON.parse(raw[0]); } catch (e) { current = { devices: [] }; }
-				try { currentNodes = JSON.parse(raw[1]); } catch (e) { currentNodes = { nodes: [] }; }
-				dom.content(body, statusRows(current));
-				dom.content(eventBody, eventRows(raw[2]));
-				(currentNodes.nodes || []).forEach(function(n) {
-					var stateEl = document.getElementById('wfc-node-state-' + n.id);
-					var pingEl = document.getElementById('wfc-node-ping-' + n.id);
-					var qualityEl = document.getElementById('wfc-node-quality-' + n.id);
-					if (stateEl) dom.content(stateEl, nodeState(n));
-					if (pingEl) dom.content(pingEl, latency(n));
-					if (qualityEl) dom.content(qualityEl, quality(n));
+			return L.resolveDefault(fs.read('/var/run/wificalling-gateway/node-status.json'), '{}').then(function(raw) {
+				var current; try { current = JSON.parse(raw); } catch (e) { current = { nodes: [] }; }
+				(current.nodes || []).forEach(function(n) {
+					[['state', nodeState(n)], ['ping', latency(n)], ['quality', quality(n)]].forEach(function(v) {
+						var el = document.getElementById('wfc-node-' + v[0] + '-' + n.id); if (el) dom.content(el, v[1]);
+					});
 				});
 			});
 		}, 5);
-		return m.render().then(function(formNode) { return E([], [formNode, status, events]); });
+		return m.render();
 	}
 });
