@@ -275,6 +275,8 @@ class PackageTests(unittest.TestCase):
             "docs/zh-CN/BUILD.md", "docs/zh-CN/TROUBLESHOOTING.md",
             "docs/en/INSTALL.md", "docs/en/CONFIGURATION.md", "docs/en/BUILD.md",
             "docs/en/TROUBLESHOOTING.md", ".github/workflows/ci.yml",
+            "docs/images/overview.png", "docs/images/device-status.png",
+            "docs/images/activity-log.png", "docs/images/iphone-ee-wificall.jpg",
         ]
         for name in expected:
             self.assertTrue((ROOT / name).exists(), name)

@@ -4,11 +4,17 @@
 
 A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes selected LAN clients through selected sing-box outbounds while leaving other clients on the normal gateway or PassWall policy. It also reports observable ePDG/IPsec UDP 500/4500 evidence commonly associated with Wi-Fi Calling.
 
-> The following two sanitized screenshots show an earlier interface. v1.2 separates settings, live status, and activity history into dedicated pages.
+### Settings
 
-![Earlier node and general settings interface](docs/images/overview.png)
+![Wi-Fi Calling Gateway settings page](docs/images/overview.png)
 
-![Earlier device policies and status interface](docs/images/device-status.png)
+### Wi-Fi Calling status
+
+![Wi-Fi Calling status page](docs/images/device-status.png)
+
+### Activity log
+
+![Encrypted IMS activity log page](docs/images/activity-log.png)
 
 ### Observed on a real iPhone
 

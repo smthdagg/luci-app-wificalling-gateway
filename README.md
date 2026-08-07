@@ -4,11 +4,17 @@
 
 面向 OpenWrt / ImmortalWrt 的独立 LuCI 插件。它把指定局域网设备通过指定的 sing-box 节点转发，同时让其他设备继续遵循原网关或 PassWall 策略，并观察 Wi‑Fi Calling 常用的 ePDG/IPsec UDP 500、4500 会话证据。
 
-> 以下两张为早期界面实测截图，敏感字段已经脱敏。v1.2 已将设置、状态和活动日志拆分为独立页面。
+### 设置
 
-![早期节点与常规设置界面](docs/images/overview.png)
+![Wi-Fi Calling Gateway 设置页面](docs/images/overview.png)
 
-![早期设备策略与状态检测界面](docs/images/device-status.png)
+### Wi-Fi Calling 状态
+
+![Wi-Fi Calling 状态页面](docs/images/device-status.png)
+
+### 活动日志
+
+![加密 IMS 活动日志页面](docs/images/activity-log.png)
 
 ### iPhone 实机观察
 
