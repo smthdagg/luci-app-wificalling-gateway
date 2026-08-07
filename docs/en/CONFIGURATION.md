@@ -1,6 +1,6 @@
 # Configuration
 
-Create and save a node before creating device policies. AnyTLS/Hysteria2 use a password; TUIC uses UUID and password; VLESS Reality uses UUID, flow, SNI, public key, short ID and fingerprint; VMess WS uses UUID, Host and path. TLS public-key pins must be Base64 SHA-256 values. The Proxy nodes grid displays alive state, measured latency, and a quality band; this is reachability evidence rather than a full proxy handshake.
+Use **Import node link** to paste one AnyTLS, Hysteria2/Hy2, TUIC, VLESS, or VMess share link. Parsing happens locally in the browser and is not sent to an external service. Review the imported server, port, SNI, TLS, and protocol-specific fields before testing. Manual entry remains available. AnyTLS/Hysteria2 use a password; TUIC uses UUID and password; VLESS Reality uses UUID, flow, SNI, public key, short ID and fingerprint; VMess WS uses UUID, Host and path. TLS public-key pins must be Base64 SHA-256 values. The Proxy nodes grid displays alive state, measured latency, and a quality band; this is reachability evidence rather than a full proxy handshake.
 
 Reserve each client IPv4 with DHCP. **Independent tunnel** bypasses PassWall and uses the selected node. **Follow gateway** is not intercepted and continues through the normal gateway/PassWall policy. One IP cannot belong to two independent policies. v1.2 intercepts IPv4 only.
 

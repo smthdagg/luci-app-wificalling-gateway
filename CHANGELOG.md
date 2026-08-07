@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 - 2026-08-07
+
+- Added local paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, and VMess share links.
+- Maps labels, credentials, TLS/SNI, Reality, WebSocket, UDP, and transport-specific fields into UCI nodes.
+- Keeps imported links inside the LuCI browser session and never logs the raw URI.
+
 ## 1.2.1 - 2026-08-07
 
 - Replaced per-poll event spam with one-time registration transitions and time-windowed sustained-traffic summaries.

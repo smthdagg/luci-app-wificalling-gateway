@@ -29,6 +29,7 @@
 ## v1.2 功能
 
 - 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket。
+- 支持直接粘贴 AnyTLS、Hysteria2/Hy2、TUIC、VLESS、VMess 分享链接并自动解析导入。
 - 每台设备可绑定一个节点；一个策略可包含多个固定私网 IPv4 地址。
 - `独立通道`：绕过 PassWall，使用插件节点；`跟随网关`：插件不拦截。
 - 单个 sing-box 进程、nftables TPROXY、TCP 与 UDP 透明转发。
@@ -53,11 +54,11 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.2.1）：
+从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.3.0）：
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.2.1-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.3.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 

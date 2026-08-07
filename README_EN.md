@@ -29,6 +29,7 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 ## v1.2 features
 
 - AnyTLS, Hysteria2, TUIC, VLESS Reality and VMess WebSocket outbounds.
+- Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, and VMess share links with local browser-side parsing.
 - One selected node per device policy; multiple fixed private IPv4 addresses per policy.
 - **Independent tunnel** bypasses PassWall and uses the plugin node; **Follow gateway** is not intercepted.
 - One sing-box process, nftables TPROXY, transparent TCP and UDP routing.
@@ -53,11 +54,11 @@ Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft
 
 ## Quick install
 
-Download the latest stable IPK from [Releases](../../releases) (currently 1.2.1), upload it to the router, then run:
+Download the latest stable IPK from [Releases](../../releases) (currently 1.3.0), upload it to the router, then run:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.2.1-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.3.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 

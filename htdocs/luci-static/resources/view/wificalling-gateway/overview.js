@@ -5,6 +5,8 @@
 'require poll';
 'require uci';
 'require dom';
+'require ui';
+'require wificalling-gateway.node-import as nodeImport';
 
 return view.extend({
 	load: function() {
@@ -40,6 +42,28 @@ return view.extend({
 
 		var m = new form.Map('wificalling-gateway', _('Wi-Fi Calling Gateway settings'),
 			_('Configure proxy nodes and assign fixed LAN devices. Monitoring and logs are available from the submenu.'));
+		var importPanel = E('div', { class: 'cbi-section' }, [
+			E('h3', {}, _('Import proxy node')),
+			E('p', {}, _('Paste one AnyTLS, Hysteria2/Hy2, TUIC, VLESS, or VMess link. It is parsed locally in this browser and is not sent to an external service.')),
+			E('button', { class: 'btn cbi-button-positive', click: function() {
+				var input = E('textarea', { class: 'cbi-input-textarea', rows: 6, style: 'width:100%', placeholder: 'anytls://…' });
+				ui.showModal(_('Import node link'), [input, E('div', { class: 'right' }, [
+					E('button', { class: 'btn', click: ui.hideModal }, _('Cancel')),
+					E('button', { class: 'btn cbi-button-positive', click: function() {
+						var parsed;
+						try { parsed = nodeImport.parse(input.value); }
+						catch (err) { ui.addNotification(null, E('p', {}, _('Unable to parse node link: ') + err.message), 'error'); return; }
+						var sid = uci.add('wificalling-gateway', 'node');
+						Object.keys(parsed).forEach(function(key) { if (parsed[key] !== '') uci.set('wificalling-gateway', sid, key, parsed[key]); });
+						uci.save().then(function() {
+							ui.hideModal();
+							ui.addNotification(null, E('p', {}, _('Node imported successfully. Reloading settings…')), 'info');
+							window.setTimeout(function() { window.location.reload(); }, 500);
+						}).catch(function(err) { ui.addNotification(null, E('p', {}, _('Unable to save imported node: ') + err.message), 'error'); });
+					} }, _('Import'))
+				])]);
+			} }, _('Import node link'))
+		]);
 		var s = m.section(form.NamedSection, 'main', 'global', _('General'));
 		s.option(form.Flag, 'enabled', _('Enable'));
 		var logLevel = s.option(form.ListValue, 'log_level', _('Log level'));
@@ -112,6 +136,6 @@ return view.extend({
 				});
 			});
 		}, 5);
-		return m.render();
+		return m.render().then(function(formNode) { return E([], [importPanel, formNode]); });
 	}
 });
