@@ -278,6 +278,8 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(acl["ubus"]["file"], ["read"])
         self.assertIn("/var/run/wificalling-gateway/status.json", acl["file"])
         self.assertIn("/var/run/wificalling-gateway/events.log", acl["file"])
+        self.assertIn("/tmp/run/wificalling-gateway/status.json", acl["file"])
+        self.assertIn("/tmp/run/wificalling-gateway/events.log", acl["file"])
 
     def test_luci_integrates_node_quality_and_removes_duplicate_reachability_panel(self):
         source = (
