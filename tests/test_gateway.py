@@ -225,9 +225,9 @@ class PackageTests(unittest.TestCase):
     def test_release_metadata_and_runtime_dependencies(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         builder = (ROOT / "scripts/build-ipk.sh").read_text(encoding="utf-8")
-        self.assertIn("PKG_VERSION:=1.0.1", makefile)
+        self.assertIn("PKG_VERSION:=1.1.0", makefile)
         self.assertIn("+tcping", makefile)
-        self.assertIn("version=${1:-1.0.1-1}", builder)
+        self.assertIn("version=${1:-1.1.0-1}", builder)
         self.assertIn("tcping", builder)
 
     def test_public_project_documentation_exists(self):
@@ -273,6 +273,7 @@ class PackageTests(unittest.TestCase):
         )["luci-app-wificalling-gateway"]["read"]
         self.assertEqual(acl["ubus"]["file"], ["read"])
         self.assertIn("/var/run/wificalling-gateway/status.json", acl["file"])
+        self.assertIn("/var/run/wificalling-gateway/events.log", acl["file"])
 
     def test_luci_integrates_node_quality_and_removes_duplicate_reachability_panel(self):
         source = (
