@@ -171,6 +171,40 @@ class MonitorTests(unittest.TestCase):
             self.assertEqual(events.stat().st_mode & 0o777, 0o644)
             self.assertEqual(state.stat().st_mode & 0o777, 0o600)
 
+    def test_throttles_poll_noise_and_keeps_per_device_limit(self):
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            clients, table = tmp / "clients", tmp / "nf_conntrack"
+            output, state, events = tmp / "status.json", tmp / "monitor.state", tmp / "events.log"
+            clients.write_text("phone|192.168.31.189|node-uk\n", encoding="utf-8")
+            packets = [(10, 12), (12, 14), (14, 16), (30, 40), (31, 41)]
+            times = [100, 105, 110, 160, 165]
+            for (sent, reply), now in zip(packets, times):
+                table.write_text(
+                    f"ipv4 2 udp 17 170 src=192.168.31.189 dst=203.0.113.9 "
+                    f"sport=4500 dport=4500 packets={sent} bytes=1 "
+                    f"src=203.0.113.9 dst=192.168.31.189 sport=4500 dport=4500 "
+                    f"packets={reply} bytes=1 [ASSURED]\n",
+                    encoding="utf-8",
+                )
+                env = dict(os.environ, WFC_NOW=str(now))
+                result = subprocess.run(
+                    [str(MONITOR), str(clients), str(table), str(output), str(state), str(events), "60", "2"],
+                    text=True, capture_output=True, env=env, check=False,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+            lines = events.read_text(encoding="utf-8").strip().splitlines()
+            self.assertEqual(len(lines), 2)
+            self.assertIn("state_change", lines[0])
+            self.assertIn("sustained_traffic", lines[1])
+
+    def test_luci_exposes_event_window_and_per_device_limit(self):
+        source = (ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/overview.js").read_text(encoding="utf-8")
+        init = (ROOT / "root/etc/init.d/wificalling-gateway").read_text(encoding="utf-8")
+        self.assertIn("event_interval", source)
+        self.assertIn("max_events_per_device", source)
+        self.assertIn("max_events_per_device", init)
+
 
 class NodeHealthTests(unittest.TestCase):
     def test_reports_ping_latency_and_unreachable_nodes(self):
