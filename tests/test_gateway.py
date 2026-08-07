@@ -253,6 +253,8 @@ class PackageTests(unittest.TestCase):
             "root/usr/share/luci/menu.d/luci-app-wificalling-gateway.json",
             "root/usr/share/rpcd/acl.d/luci-app-wificalling-gateway.json",
             "htdocs/luci-static/resources/view/wificalling-gateway/overview.js",
+            "htdocs/luci-static/resources/view/wificalling-gateway/status.js",
+            "htdocs/luci-static/resources/view/wificalling-gateway/events.js",
         ]
         for name in expected:
             self.assertTrue((ROOT / name).exists(), name)
@@ -294,14 +296,27 @@ class PackageTests(unittest.TestCase):
         self.assertIn("Quality", source)
 
     def test_luci_shows_wificalling_evidence_and_encrypted_activity_log(self):
-        source = (
-            ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/overview.js"
-        ).read_text(encoding="utf-8")
-        self.assertIn("Wi-Fi Calling status", source)
-        self.assertIn("UDP 500/4500", source)
-        self.assertIn("Last activity", source)
-        self.assertIn("Encrypted IMS activity log", source)
-        self.assertIn("Calls and SMS cannot be distinguished", source)
+        overview = (ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/overview.js").read_text(encoding="utf-8")
+        status = (ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/status.js").read_text(encoding="utf-8")
+        events = (ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/events.js").read_text(encoding="utf-8")
+        menu = json.loads((ROOT / "root/usr/share/luci/menu.d/luci-app-wificalling-gateway.json").read_text(encoding="utf-8"))
+        self.assertNotIn("Encrypted IMS activity log", overview)
+        self.assertIn("Wi-Fi Calling status", status)
+        self.assertIn("UDP 500/4500", status)
+        self.assertIn("Last activity", status)
+        self.assertIn("Encrypted IMS activity log", events)
+        self.assertIn("Clear log", events)
+        self.assertIn("fs.write", events)
+        self.assertIn("admin/services/wificalling-gateway/status", menu)
+        self.assertIn("admin/services/wificalling-gateway/events", menu)
+
+    def test_luci_acl_scopes_log_clear_to_event_file(self):
+        acl = json.loads((ROOT / "root/usr/share/rpcd/acl.d/luci-app-wificalling-gateway.json").read_text(encoding="utf-8"))["luci-app-wificalling-gateway"]
+        self.assertEqual(acl["write"]["ubus"]["file"], ["write"])
+        self.assertEqual(set(acl["write"]["file"]), {
+            "/var/run/wificalling-gateway/events.log",
+            "/tmp/run/wificalling-gateway/events.log",
+        })
 
     def test_luci_offers_independent_and_gateway_device_modes(self):
         source = (
