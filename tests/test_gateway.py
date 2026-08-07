@@ -167,6 +167,9 @@ class MonitorTests(unittest.TestCase):
             log = events.read_text(encoding="utf-8")
             self.assertIn("encrypted_ims_traffic", log)
             self.assertIn("call_or_sms_unknown", log)
+            self.assertEqual(output.stat().st_mode & 0o777, 0o644)
+            self.assertEqual(events.stat().st_mode & 0o777, 0o644)
+            self.assertEqual(state.stat().st_mode & 0o777, 0o600)
 
 
 class NodeHealthTests(unittest.TestCase):
@@ -219,6 +222,7 @@ class NodeHealthTests(unittest.TestCase):
             self.assertEqual(payload["nodes"][2]["state"], "tcp_reachable")
             self.assertEqual(payload["nodes"][2]["ping_ms"], 41.7)
             self.assertEqual(payload["nodes"][2]["measurement"], "tcp")
+            self.assertEqual(output.stat().st_mode & 0o777, 0o644)
 
 
 class PackageTests(unittest.TestCase):
