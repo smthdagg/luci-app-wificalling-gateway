@@ -4,7 +4,7 @@ Requirements: OpenWrt or ImmortalWrt with firewall4/nftables; `sing-box >= 1.13.
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.0.1-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.1.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 

@@ -4,42 +4,78 @@ set -eu
 clients=${1:?client map required}
 conntrack=${2:-/proc/net/nf_conntrack}
 output=${3:-/var/run/wificalling-gateway/status.json}
+output_dir=${output%/*}
+[ "$output_dir" != "$output" ] || output_dir=.
+state=${4:-$output_dir/monitor.state}
+events=${5:-$output_dir/events.log}
 tmp="${output}.tmp.$$"
-trap 'rm -f "$tmp"' EXIT HUP INT TERM
+state_tmp="${state}.tmp.$$"
+event_tmp="${events}.tmp.$$"
+trim_tmp="${events}.trim.$$"
+trap 'rm -f "$tmp" "$state_tmp" "$event_tmp" "$trim_tmp"' EXIT HUP INT TERM
 
 now=$(date +%s)
-awk -F '|' -v now="$now" '
+touch "$state" "$events"
+: > "$state_tmp"
+: > "$event_tmp"
+
+awk -F '|' -v now="$now" -v clients_file="$clients" -v conntrack_file="$conntrack" \
+	-v state_file="$state" -v state_out="$state_tmp" -v event_out="$event_tmp" '
 function q(s, x) { x=s; gsub(/\\/,"\\\\",x); gsub(/\"/,"\\\"",x); return "\"" x "\"" }
-FNR==NR { if ($1!="" && $2!="") { n++; label[n]=$1; ip[n]=$2; node[n]=$3 } next }
-{
+FILENAME==clients_file {
+  if ($1!="" && $2!="") { n++; label[n]=$1; ip[n]=$2; node[n]=$3; index_by_ip[$2]=n }
+  next
+}
+FILENAME==state_file {
+  i=index_by_ip[$2]
+  if (i) { old_wfc[i]=$3; old_sent[i]=$4+0; old_reply[i]=$5+0; old_last[i]=$6+0 }
+  next
+}
+FILENAME==conntrack_file {
   line=$0
   for (i=1;i<=n;i++) {
     if (line !~ ("src=" ip[i] " ")) continue
-    if (match(line,/dst=[0-9.]+/)) { dst=substr(line,RSTART+4,RLENGTH-4) }
+    if (match(line,/dst=[0-9.]+/)) dst=substr(line,RSTART+4,RLENGTH-4)
     is500=(line ~ /dport=500 /); is4500=(line ~ /dport=4500 /)
     if (!is500 && !is4500) continue
-    if (is500 && state[i]<1) state[i]=1
-    if (is4500 && state[i]<2) state[i]=2
-    if (is4500 && line ~ /\[ASSURED\]/) { state[i]=3; assured[i]=1 }
+    if (is500) ike[i]=1
+    if (is4500) natt[i]=1
+    if (is4500 && line ~ /\[ASSURED\]/) assured[i]=1
     epdg[i]=dst
     count=0; rest=line
     while (match(rest,/packets=[0-9]+/)) {
-      val=substr(rest,RSTART+8,RLENGTH-8)+0
-      count++
+      val=substr(rest,RSTART+8,RLENGTH-8)+0; count++
       if (count==1) sent[i]=val; else if(count==2) reply[i]=val
       rest=substr(rest,RSTART+RLENGTH)
     }
   }
+  next
 }
 END {
-  print "{\"generated_at\":" now ",\"disclaimer\":\"Network evidence only; carrier IMS activation is not confirmed.\",\"devices\":["
+  print "{\"generated_at\":" now ",\"disclaimer\":\"Encrypted IPsec evidence only; calls and SMS cannot be distinguished.\",\"devices\":["
   for(i=1;i<=n;i++) {
-    s=(state[i]==3 && sent[i]+reply[i]>=100?"active_traffic":state[i]==3?"likely_registered":state[i]==2?"nat_t_seen":state[i]==1?"negotiating":"no_session")
-    printf "%s{\"label\":%s,\"ip\":%s,\"node\":%s,\"state\":%s,\"epdg_ip\":%s,\"assured\":%s,\"sent_packets\":%d,\"reply_packets\":%d}", (i>1?",":""), q(label[i]), q(ip[i]), q(node[i]), q(s), q(epdg[i]), (assured[i]?"true":"false"), sent[i]+0, reply[i]+0
+    wfc=(assured[i]?"registered":natt[i]||ike[i]?"connecting":"not_detected")
+    legacy=(assured[i] && sent[i]+reply[i]>=100?"active_traffic":assured[i]?"likely_registered":natt[i]?"nat_t_seen":ike[i]?"negotiating":"no_session")
+    ds=(sent[i]>=old_sent[i]?sent[i]-old_sent[i]:sent[i])
+    dr=(reply[i]>=old_reply[i]?reply[i]-old_reply[i]:reply[i])
+    activity=(ds+dr>0?"encrypted_ims_traffic":"none")
+    last=(ds+dr>0?now:old_last[i])
+    printf "%s{", (i>1?",":"")
+    printf "\"label\":%s,\"ip\":%s,\"node\":%s,\"state\":%s,\"wificalling\":%s,", q(label[i]),q(ip[i]),q(node[i]),q(legacy),q(wfc)
+    printf "\"epdg_ip\":%s,\"ike_seen\":%s,\"nat_t_seen\":%s,\"assured\":%s,", q(epdg[i]),(ike[i]?"true":"false"),(natt[i]?"true":"false"),(assured[i]?"true":"false")
+    printf "\"sent_packets\":%d,\"reply_packets\":%d,\"delta_sent\":%d,\"delta_reply\":%d,\"last_activity\":%d,\"activity_evidence\":%s}", sent[i]+0,reply[i]+0,ds,dr,last,q(activity)
+    print label[i] "|" ip[i] "|" wfc "|" sent[i]+0 "|" reply[i]+0 "|" last > state_out
+    if (wfc!=old_wfc[i] || ds+dr>0)
+      print now "|" label[i] "|" ip[i] "|" activity "|" ds "|" dr "|call_or_sms_unknown|" wfc > event_out
   }
   print "]}"
 }
-' "$clients" "$conntrack" > "$tmp"
-chmod 600 "$tmp"
+' "$clients" "$state" "$conntrack" > "$tmp"
+
+cat "$event_tmp" >> "$events"
+tail -n 100 "$events" > "$trim_tmp"
+mv "$trim_tmp" "$events"
+chmod 600 "$tmp" "$state_tmp" "$events"
+mv "$state_tmp" "$state"
 mv "$tmp" "$output"
 trap - EXIT HUP INT TERM

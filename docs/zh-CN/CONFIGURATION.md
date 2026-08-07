@@ -4,7 +4,7 @@
 
 先点“添加代理节点”，填写显示名称、协议、服务器和协议必需字段。AnyTLS/Hysteria2 使用密码；TUIC 使用 UUID 和密码；VLESS Reality 使用 UUID、flow、SNI、公钥、short ID 和指纹；VMess WS 使用 UUID、Host 和路径。TLS 公钥指纹必须是 Base64 SHA-256，而不是十六进制文本。
 
-节点状态只检测 ICMP，TCP 型协议失败时会用 `tcping` 探测端口。它不执行完整代理握手。UDP 型节点显示 `no_icmp_reply` 不能直接判定离线。
+Proxy nodes 列表直接显示节点存活状态、Ping/延迟和质量等级。优先检测 ICMP，TCP 型协议失败时会用 `tcping` 探测端口。它不执行完整代理握手。UDP 型节点显示未知不能直接判定离线。
 
 ## 设备策略
 
@@ -28,6 +28,8 @@
 | `active_traffic` | 双向 `ASSURED` 且包量较高 |
 
 这些是路由器侧网络证据，不是运营商激活结论。
+
+设备监控还记录最近 100 条加密 IMS 活动，包括时间、状态变化和包量增量。由于通话与短信均位于加密 IPsec 隧道内，插件不能识别号码、正文，也不能可靠区分一次活动究竟是通话还是短信。
 
 ## 与 PassWall 共存
 

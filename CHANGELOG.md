@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0 - 2026-08-07
+
+- Integrated node alive state, measured latency, and quality bands directly into the Proxy nodes grid.
+- Removed the duplicate Observed node reachability panel.
+- Expanded device monitoring with Wi-Fi Calling registration, ePDG, UDP 500/4500, ASSURED, packet totals, deltas, and last activity.
+- Added a capped encrypted IMS activity log while explicitly avoiding unsupported call/SMS identification claims.
+
 ## 1.0.1 - 2026-08-07
 
 - Fixed empty LuCI monitoring tables by granting the required read-only `ubus.file.read` permission for the two runtime status files.

@@ -6,7 +6,8 @@
       "ubus": { "file": [ "read" ] },
       "file": {
         "/var/run/wificalling-gateway/status.json": [ "read" ],
-        "/var/run/wificalling-gateway/node-status.json": [ "read" ]
+        "/var/run/wificalling-gateway/node-status.json": [ "read" ],
+        "/var/run/wificalling-gateway/events.log": [ "read" ]
       }
     },
     "write": { "uci": [ "wificalling-gateway" ] }
