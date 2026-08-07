@@ -7,6 +7,11 @@ out="$root/dist/luci-app-wificalling-gateway_${version}_all.ipk"
 stage=$(mktemp -d "${TMPDIR:-/tmp}/wfc-ipk.XXXXXX")
 trap 'rm -rf "$stage"' EXIT HUP INT TERM
 
+tar_format=gnutar
+case "$(tar --version 2>/dev/null | head -n 1)" in
+	*GNU*) tar_format=gnu ;;
+esac
+
 mkdir -p "$stage/control" "$stage/data" "$root/dist"
 cp -R "$root/root/." "$stage/data/"
 cp -R "$root/htdocs" "$stage/data/www/"
@@ -25,8 +30,8 @@ printf '%s\n' \
 printf '/etc/config/wificalling-gateway\n' > "$stage/control/conffiles"
 printf '2.0\n' > "$stage/debian-binary"
 
-(cd "$stage/control" && COPYFILE_DISABLE=1 tar --format gnutar --uid 0 --gid 0 --uname root --gname root -czf "$stage/control.tar.gz" .)
-(cd "$stage/data" && COPYFILE_DISABLE=1 tar --format gnutar --uid 0 --gid 0 --uname root --gname root -czf "$stage/data.tar.gz" .)
+(cd "$stage/control" && COPYFILE_DISABLE=1 tar --format "$tar_format" --uid 0 --gid 0 --uname root --gname root -czf "$stage/control.tar.gz" .)
+(cd "$stage/data" && COPYFILE_DISABLE=1 tar --format "$tar_format" --uid 0 --gid 0 --uname root --gname root -czf "$stage/data.tar.gz" .)
 rm -f "$out"
-(cd "$stage" && COPYFILE_DISABLE=1 tar --format gnutar --uid 0 --gid 0 --uname root --gname root -czf "$out" debian-binary data.tar.gz control.tar.gz)
+(cd "$stage" && COPYFILE_DISABLE=1 tar --format "$tar_format" --uid 0 --gid 0 --uname root --gname root -czf "$out" debian-binary data.tar.gz control.tar.gz)
 echo "$out"
