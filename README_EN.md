@@ -29,7 +29,7 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 - ICMP/TCP reachability and latency observations.
 - Separate LuCI pages for settings, live Wi-Fi Calling status, and encrypted IMS activity.
 - UDP 500/4500 evidence with registration state, ePDG, ASSURED, packet totals, and last activity.
-- Activity history capped at 100 records with automatic refresh, record count, and confirmation-protected clearing.
+- Logs only state changes and time-windowed sustained traffic; each device independently keeps 20 records by default, configurable in Settings.
 - `sing-box check` before startup and mode `0600` for credential-bearing files.
 
 ## Compatibility
@@ -47,11 +47,11 @@ Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft
 
 ## Quick install
 
-Download the latest stable IPK from [Releases](../../releases) (currently 1.2.0), upload it to the router, then run:
+Download the latest stable IPK from [Releases](../../releases) (currently 1.2.1), upload it to the router, then run:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.2.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.2.1-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 

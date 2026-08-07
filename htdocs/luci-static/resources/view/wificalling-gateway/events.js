@@ -25,7 +25,7 @@ return view.extend({
 				E('button', { class: 'btn cbi-button-negative', click: function() { fs.write('/var/run/wificalling-gateway/events.log', '').then(function() { update(''); ui.hideModal(); ui.addNotification(null, E('p', {}, _('Activity log cleared.')), 'info'); }).catch(function(err) { ui.addNotification(null, E('p', {}, _('Unable to clear log: ') + err.message), 'error'); }); } }, _('Clear log'))])]);
 		} }, _('Clear log'));
 		poll.add(function() { return L.resolveDefault(fs.read('/var/run/wificalling-gateway/events.log'), '').then(update); }, 5);
-		return E([], [E('h2', {}, _('Encrypted IMS activity log')), E('p', {}, _('Records encrypted tunnel activity only. Phone numbers, message content, and whether an event is a call or SMS are not visible.')),
+		return E([], [E('h2', {}, _('Encrypted IMS activity log')), E('p', {}, _('Records registration changes once and aggregates sustained encrypted traffic by the configured time window. Brief packet changes are not logged. Phone numbers, message content, and whether an event is a call or SMS are not visible.')),
 			E('div', { class: 'cbi-section' }, [E('p', {}, [_('Records: '), count, ' ', clear]), E('table', { class: 'table' }, [E('tr', { class: 'tr table-titles' }, [_('Time'), _('Device'), _('IP'), _('Wi-Fi Calling'), _('Activity'), _('Packet delta'), _('Meaning')].map(function(x) { return E('th', { class: 'th' }, x); })), body])])]);
 	}
 });

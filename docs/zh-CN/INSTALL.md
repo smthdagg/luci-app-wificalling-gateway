@@ -11,7 +11,7 @@
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.2.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.2.1-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 

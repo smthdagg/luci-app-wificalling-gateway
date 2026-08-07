@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1 - 2026-08-07
+
+- Replaced per-poll event spam with one-time registration transitions and time-windowed sustained-traffic summaries.
+- Requires traffic in three consecutive samples before writing a sustained activity event.
+- Added configurable aggregation interval and per-device retention limit (defaults: 60 seconds and 20 records).
+
 ## 1.2.0 - 2026-08-07
 
 - Split configuration, live Wi-Fi Calling status, and encrypted IMS activity into separate LuCI pages.

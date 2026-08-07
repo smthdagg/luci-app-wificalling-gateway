@@ -263,9 +263,9 @@ class PackageTests(unittest.TestCase):
     def test_release_metadata_and_runtime_dependencies(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         builder = (ROOT / "scripts/build-ipk.sh").read_text(encoding="utf-8")
-        self.assertIn("PKG_VERSION:=1.2.0", makefile)
+        self.assertIn("PKG_VERSION:=1.2.1", makefile)
         self.assertIn("+tcping", makefile)
-        self.assertIn("version=${1:-1.2.0-1}", builder)
+        self.assertIn("version=${1:-1.2.1-1}", builder)
         self.assertIn("tcping", builder)
 
     def test_public_project_documentation_exists(self):

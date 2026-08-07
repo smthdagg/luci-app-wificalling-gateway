@@ -29,7 +29,7 @@
 - 节点 ICMP/TCP 可达性与延迟检测。
 - 设置、Wi‑Fi Calling 状态、加密 IMS 活动日志分为三个独立管理页面。
 - 观察 UDP 500/4500，显示注册状态、ePDG、ASSURED、包计数及最后活动时间。
-- 活动日志最多保留最近 100 条，支持自动刷新、记录计数及二次确认后清空。
+- 只记录状态变化和按时间窗口汇总的持续通信；每台设备默认独立保留最近 20 条，可在设置中调整。
 - 启动前执行 `sing-box check`；配置和运行时凭据权限设为 `0600`。
 
 ## 支持环境
@@ -47,11 +47,11 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.2.0）：
+从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.2.1）：
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.2.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.2.1-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 

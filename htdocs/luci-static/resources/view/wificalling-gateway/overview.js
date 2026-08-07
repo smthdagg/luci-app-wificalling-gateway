@@ -44,6 +44,12 @@ return view.extend({
 		s.option(form.Flag, 'enabled', _('Enable'));
 		var logLevel = s.option(form.ListValue, 'log_level', _('Log level'));
 		logLevel.value('warn'); logLevel.value('info'); logLevel.value('debug');
+		var eventInterval = s.option(form.Value, 'event_interval', _('Sustained activity log interval (seconds)'));
+		eventInterval.datatype = 'range(30,3600)'; eventInterval.default = '60';
+		eventInterval.description = _('Continuous traffic is aggregated and written at most once per interval.');
+		var maxEvents = s.option(form.Value, 'max_events_per_device', _('Maximum records per device'));
+		maxEvents.datatype = 'range(1,500)'; maxEvents.default = '20';
+		maxEvents.description = _('Each device keeps its own newest records, so one device cannot fill the entire log.');
 
 		s = m.section(form.GridSection, 'node', _('Proxy nodes'));
 		s.addremove = true; s.nodescriptions = true; s.anonymous = true; s.addbtntitle = _('Add proxy node');
