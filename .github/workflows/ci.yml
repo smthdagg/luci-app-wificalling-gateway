@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Unit and integration tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Shell syntax
+        run: for f in root/etc/init.d/wificalling-gateway root/usr/libexec/wificalling-gateway/*.sh scripts/*.sh; do sh -n "$f"; done
+      - name: LuCI JavaScript syntax
+        run: node --check htdocs/luci-static/resources/view/wificalling-gateway/overview.js
+      - name: Build package
+        run: ./scripts/build-ipk.sh 1.0.0-1
