@@ -142,6 +142,32 @@ class MonitorTests(unittest.TestCase):
         _, payload = self.monitor(line)
         self.assertEqual(payload["devices"][0]["state"], "active_traffic")
 
+    def test_persists_last_activity_and_writes_encrypted_ims_event(self):
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            clients = tmp / "clients"
+            table = tmp / "nf_conntrack"
+            output = tmp / "status.json"
+            state = tmp / "monitor.state"
+            events = tmp / "events.log"
+            clients.write_text("phone|192.168.31.189|node-uk\n", encoding="utf-8")
+            table.write_text(
+                "ipv4 2 udp 17 170 src=192.168.31.189 dst=203.0.113.9 "
+                "sport=4500 dport=4500 packets=70 bytes=4300 "
+                "src=203.0.113.9 dst=192.168.31.189 sport=4500 dport=4500 "
+                "packets=60 bytes=5200 [ASSURED]\n",
+                encoding="utf-8",
+            )
+            result = run_script(MONITOR, clients, table, output, state, events)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            item = json.loads(output.read_text(encoding="utf-8"))["devices"][0]
+            self.assertEqual(item["wificalling"], "registered")
+            self.assertGreater(item["last_activity"], 0)
+            self.assertEqual(item["activity_evidence"], "encrypted_ims_traffic")
+            log = events.read_text(encoding="utf-8")
+            self.assertIn("encrypted_ims_traffic", log)
+            self.assertIn("call_or_sms_unknown", log)
+
 
 class NodeHealthTests(unittest.TestCase):
     def test_reports_ping_latency_and_unreachable_nodes(self):
@@ -248,14 +274,27 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(acl["ubus"]["file"], ["read"])
         self.assertIn("/var/run/wificalling-gateway/status.json", acl["file"])
 
-    def test_luci_explains_names_device_ips_and_node_refresh(self):
+    def test_luci_integrates_node_quality_and_removes_duplicate_reachability_panel(self):
         source = (
             ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/overview.js"
         ).read_text(encoding="utf-8")
         self.assertIn("s.anonymous = true", source)
         self.assertIn("192.168.31.189", source)
         self.assertIn("Save the node first", source)
-        self.assertIn("Observed node reachability", source)
+        self.assertNotIn("Observed node reachability", source)
+        self.assertIn("Node status", source)
+        self.assertIn("Ping / latency", source)
+        self.assertIn("Quality", source)
+
+    def test_luci_shows_wificalling_evidence_and_encrypted_activity_log(self):
+        source = (
+            ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/overview.js"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Wi-Fi Calling status", source)
+        self.assertIn("UDP 500/4500", source)
+        self.assertIn("Last activity", source)
+        self.assertIn("Encrypted IMS activity log", source)
+        self.assertIn("Calls and SMS cannot be distinguished", source)
 
     def test_luci_offers_independent_and_gateway_device_modes(self):
         source = (
