@@ -52,14 +52,14 @@ return view.extend({
 					E('button', { class: 'btn cbi-button-positive', click: function() {
 						var parsed;
 						try { parsed = nodeImport.parse(input.value); }
-						catch (err) { ui.addNotification(null, E('p', {}, _('Unable to parse node link: ') + err.message), 'error'); return; }
+						catch (err) { ui.addNotification(null, E('p', {}, _('Unable to parse node link:') + ' ' + err.message), 'error'); return; }
 						var sid = uci.add('wificalling-gateway', 'node');
 						Object.keys(parsed).forEach(function(key) { if (parsed[key] !== '') uci.set('wificalling-gateway', sid, key, parsed[key]); });
 						uci.save().then(function() {
 							ui.hideModal();
 							ui.addNotification(null, E('p', {}, _('Node imported successfully. Reloading settings…')), 'info');
 							window.setTimeout(function() { window.location.reload(); }, 500);
-						}).catch(function(err) { ui.addNotification(null, E('p', {}, _('Unable to save imported node: ') + err.message), 'error'); });
+						}).catch(function(err) { ui.addNotification(null, E('p', {}, _('Unable to save imported node:') + ' ' + err.message), 'error'); });
 					} }, _('Import'))
 				])]);
 			} }, _('Import node link'))
@@ -67,12 +67,17 @@ return view.extend({
 		var s = m.section(form.NamedSection, 'main', 'global', _('General'));
 		s.option(form.Flag, 'enabled', _('Enable'));
 		var logLevel = s.option(form.ListValue, 'log_level', _('Log level'));
-		logLevel.value('warn'); logLevel.value('info'); logLevel.value('debug');
+		logLevel.value('warn', _('Warning')); logLevel.value('info', _('Information')); logLevel.value('debug', _('Debug'));
+		var logEnabled = s.option(form.Flag, 'log_enabled', _('Activity log'));
+		logEnabled.default = '1';
+		logEnabled.description = _('Record handshake outcomes and sustained encrypted communication. Turn off to stop writing the activity log.');
 		var eventInterval = s.option(form.Value, 'event_interval', _('Sustained activity log interval (seconds)'));
 		eventInterval.datatype = 'range(30,3600)'; eventInterval.default = '60';
+		eventInterval.depends('log_enabled', '1');
 		eventInterval.description = _('Continuous traffic is aggregated and written at most once per interval.');
 		var maxEvents = s.option(form.Value, 'max_events_per_device', _('Maximum records per device'));
 		maxEvents.datatype = 'range(1,500)'; maxEvents.default = '20';
+		maxEvents.depends('log_enabled', '1');
 		maxEvents.description = _('Each device keeps its own newest records, so one device cannot fill the entire log.');
 
 		s = m.section(form.GridSection, 'node', _('Proxy nodes'));
@@ -104,9 +109,9 @@ return view.extend({
 		s.option(form.Value, 'short_id', _('Reality short ID'));
 		s.option(form.Value, 'fingerprint', _('Reality fingerprint'));
 		var udpMode = s.option(form.ListValue, 'udp_mode', _('TUIC UDP mode'));
-		udpMode.value('native'); udpMode.value('quic');
+		udpMode.value('native', _('Native')); udpMode.value('quic', _('QUIC'));
 		var transport = s.option(form.ListValue, 'transport', _('Transport'));
-		transport.value(''); transport.value('ws');
+		transport.value('', _('None')); transport.value('ws', _('WebSocket'));
 		s.option(form.Value, 'path', _('WebSocket path'));
 		s.option(form.Value, 'host', _('WebSocket Host'));
 

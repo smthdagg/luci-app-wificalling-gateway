@@ -18,7 +18,7 @@ function truthy(value) {
 }
 
 function common(protocol, url) {
-	if (!url.hostname || !url.port) throw new Error('Server and port are required');
+	if (!url.hostname || !url.port) throw new Error(_('Server and port are required'));
 	return {
 		enabled: '1', protocol: protocol, server: url.hostname, port: url.port,
 		label: decodeLabel(url.hash.replace(/^#/, '')) || protocol.toUpperCase() + ' ' + url.hostname
@@ -60,7 +60,7 @@ function parseUrl(uri, protocol) {
 
 function parseVmess(uri) {
 	var raw = JSON.parse(decodeBase64(uri.slice('vmess://'.length).trim()));
-	if (!raw.add || !raw.port || !raw.id) throw new Error('VMess server, port and UUID are required');
+	if (!raw.add || !raw.port || !raw.id) throw new Error(_('VMess server, port and UUID are required'));
 	var out = {
 		enabled: '1', protocol: 'vmess', label: raw.ps || 'VMess ' + raw.add,
 		server: raw.add, port: String(raw.port), uuid: raw.id, alter_id: String(raw.aid || 0),
@@ -75,7 +75,7 @@ function parse(uri) {
 	if (scheme === 'vmess') return parseVmess(value);
 	if (scheme === 'hy2') scheme = 'hysteria2';
 	if (['anytls', 'hysteria2', 'tuic', 'vless'].indexOf(scheme) < 0)
-		throw new Error('Unsupported node link format');
+		throw new Error(_('Unsupported node link format'));
 	return parseUrl(value, scheme);
 }
 

@@ -25,4 +25,4 @@ jobs:
       - name: LuCI JavaScript syntax
         run: for f in htdocs/luci-static/resources/view/wificalling-gateway/*.js; do node --check "$f"; done
       - name: Build package
-        run: ./scripts/build-ipk.sh 1.3.0-2
+        run: ./scripts/build-ipk.sh 1.4.0-1

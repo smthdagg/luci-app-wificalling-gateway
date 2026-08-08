@@ -36,15 +36,16 @@
 - 节点 ICMP/TCP 可达性与延迟检测。
 - 设置、Wi‑Fi Calling 状态、加密 IMS 活动日志分为三个独立管理页面。
 - 观察 UDP 500/4500，显示注册状态、ePDG、ASSURED、包计数及最后活动时间。
-- 只记录状态变化和按时间窗口汇总的持续通信；每台设备默认独立保留最近 20 条，可在设置中调整。
+- 只记录握手成功/失败与持续加密通讯（响铃或通话，持续数秒以上）；每台设备默认独立保留最近 20 条，可在设置中调整或关闭活动日志。
 - 启动前执行 `sing-box check`；配置和运行时凭据权限设为 `0600`。
 
 ## 支持环境
 
-| 项目 | v1.2 支持范围 |
+| 项目 | 支持范围 |
 |---|---|
 | 固件 | OpenWrt / ImmortalWrt，firewall4 + nftables |
 | 已实机验证 | ImmortalWrt 24.10.6，Redmi AX6S，aarch64_cortex-a53 |
+| 源码兼容 | ImmortalWrt 24.10 与 25.12（ucode dispatcher 的 i18n 加载路径、`luci.mk` 的 `LUCI_LC_ALIAS.zh_Hans=zh-cn`、`sing-box`/`firewall4`/`kmod-nft-tproxy` 依赖均一致） |
 | sing-box | 建议 1.13.0 或更高版本 |
 | LuCI | JavaScript 视图（现代 LuCI） |
 | 网络 | IPv4 LAN 策略；设备必须使用 DHCP 静态租约 |
@@ -54,15 +55,40 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.3.0）：
+从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.4.0）：
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.3.0-2_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 然后进入 **服务 → Wi‑Fi Calling Gateway**。先添加并保存节点，再添加设备策略。详细步骤见[安装说明](docs/zh-CN/INSTALL.md)和[配置说明](docs/zh-CN/CONFIGURATION.md)。
+
+## 分发与安装源
+
+### 1. Releases IPK（默认）
+从 [Releases](../../releases) 下载 `.ipk`，`opkg install ./xxx.ipk` 后 `/etc/init.d/rpcd restart`（见上）。
+
+### 2. 自建 opkg 源（保底，随时可用）
+不依赖官方审批，自行托管即可让用户 `opkg install` 直装。
+
+**维护者侧**：把 `.ipk` 放到一个目录，用 OpenWrt 的 `ipkg-make-index.sh` 生成索引：
+```sh
+ipkg-make-index.sh . > Packages
+gzip -kf Packages   # 生成 Packages.gz
+# 用 GitHub Pages 或任意 HTTPS 静态服务器托管该目录（含 Packages、Packages.gz、*.ipk）
+```
+
+**用户侧**：在路由器 `/etc/opkg/customfeeds.conf` 加一行，再安装：
+```sh
+echo 'src/gz wificalling https://你的域名/feed' >> /etc/opkg/customfeeds.conf
+opkg update
+opkg install luci-app-wificalling-gateway
+```
+
+### 3. ImmortalWrt 官方源（路径 A）
+本仓库按官方 luci feed 规范组织（`Makefile` 含 `PKG_MAINTAINER`/`LUCI_URL`/`luci.mk`，`po/zh_Hans/` + `po/templates/`，不提交 `.lmo`），依赖栈与官方 `luci-app-homeproxy` 一致（`sing-box + firewall4 + kmod-nft-tproxy`）。提交流程见[贡献与上游说明](docs/zh-CN/SUBMITTING.md)。
 
 ## 重要边界
 

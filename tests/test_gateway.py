@@ -165,7 +165,7 @@ class MonitorTests(unittest.TestCase):
             self.assertGreater(item["last_activity"], 0)
             self.assertEqual(item["activity_evidence"], "encrypted_ims_traffic")
             log = events.read_text(encoding="utf-8")
-            self.assertIn("encrypted_ims_traffic", log)
+            self.assertIn("handshake_success", log)
             self.assertIn("call_or_sms_unknown", log)
             self.assertEqual(output.stat().st_mode & 0o777, 0o644)
             self.assertEqual(events.stat().st_mode & 0o777, 0o644)
@@ -195,15 +195,67 @@ class MonitorTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
             lines = events.read_text(encoding="utf-8").strip().splitlines()
             self.assertEqual(len(lines), 2)
-            self.assertIn("state_change", lines[0])
+            self.assertIn("handshake_success", lines[0])
             self.assertIn("sustained_traffic", lines[1])
+
+    def test_log_disabled_writes_no_events(self):
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            clients, table = tmp / "clients", tmp / "nf_conntrack"
+            output, state, events = tmp / "status.json", tmp / "monitor.state", tmp / "events.log"
+            clients.write_text("phone|192.168.31.189|node-uk\n", encoding="utf-8")
+            table.write_text(
+                "ipv4 2 udp 17 170 src=192.168.31.189 dst=203.0.113.9 "
+                "sport=4500 dport=4500 packets=70 bytes=4300 "
+                "src=203.0.113.9 dst=192.168.31.189 sport=4500 dport=4500 "
+                "packets=60 bytes=5200 [ASSURED]\n",
+                encoding="utf-8",
+            )
+            # 8th arg log_enabled=0: an ASSURED handshake is observed in
+            # status.json but nothing is written to the activity log.
+            result = run_script(MONITOR, clients, table, output, state, events, "60", "20", "0")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            item = json.loads(output.read_text(encoding="utf-8"))["devices"][0]
+            self.assertEqual(item["wificalling"], "registered")
+            self.assertEqual(events.read_text(encoding="utf-8"), "")
+
+    def test_logs_handshake_failure_when_session_drops(self):
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            clients, table = tmp / "clients", tmp / "nf_conntrack"
+            output, state, events = tmp / "status.json", tmp / "monitor.state", tmp / "events.log"
+            clients.write_text("phone|192.168.31.189|node-uk\n", encoding="utf-8")
+            assured = (
+                "ipv4 2 udp 17 170 src=192.168.31.189 dst=203.0.113.9 "
+                "sport=4500 dport=4500 packets=70 bytes=4300 "
+                "src=203.0.113.9 dst=192.168.31.189 sport=4500 dport=4500 "
+                "packets=60 bytes=5200 [ASSURED]\n"
+            )
+            # poll 1: ASSURED established -> handshake_success
+            table.write_text(assured, encoding="utf-8")
+            subprocess.run(
+                [str(MONITOR), str(clients), str(table), str(output), str(state), str(events), "60", "20"],
+                text=True, capture_output=True, env=dict(os.environ, WFC_NOW="100"), check=False,
+            )
+            # poll 2: conntrack entry gone -> registered drops to not_detected -> handshake_failed
+            table.write_text("", encoding="utf-8")
+            subprocess.run(
+                [str(MONITOR), str(clients), str(table), str(output), str(state), str(events), "60", "20"],
+                text=True, capture_output=True, env=dict(os.environ, WFC_NOW="105"), check=False,
+            )
+            lines = events.read_text(encoding="utf-8").strip().splitlines()
+            self.assertEqual(len(lines), 2)
+            self.assertIn("handshake_success", lines[0])
+            self.assertIn("handshake_failed", lines[1])
 
     def test_luci_exposes_event_window_and_per_device_limit(self):
         source = (ROOT / "htdocs/luci-static/resources/view/wificalling-gateway/overview.js").read_text(encoding="utf-8")
         init = (ROOT / "root/etc/init.d/wificalling-gateway").read_text(encoding="utf-8")
         self.assertIn("event_interval", source)
         self.assertIn("max_events_per_device", source)
+        self.assertIn("log_enabled", source)
         self.assertIn("max_events_per_device", init)
+        self.assertIn("log_enabled", init)
 
 
 class NodeHealthTests(unittest.TestCase):
@@ -319,17 +371,57 @@ class PackageTests(unittest.TestCase):
     def test_release_metadata_and_runtime_dependencies(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         builder = (ROOT / "scripts/build-ipk.sh").read_text(encoding="utf-8")
-        self.assertIn("PKG_VERSION:=1.3.0", makefile)
+        self.assertIn("PKG_VERSION:=1.4.0", makefile)
         self.assertIn("+tcping", makefile)
-        self.assertIn("PKG_RELEASE:=2", makefile)
-        self.assertIn("version=${1:-1.3.0-2}", builder)
+        self.assertIn("PKG_RELEASE:=1", makefile)
+        self.assertIn("version=${1:-1.4.0-1}", builder)
         self.assertIn("tcping", builder)
+
+    def test_chinese_translation_catalog_compiles_and_translates(self):
+        # The Chinese .po source must exist and carry a real translation.
+        # po/ uses the gettext code zh_Hans; luci.mk / build-ipk.sh alias it to zh-cn.
+        po = ROOT / "po/zh_Hans/wificalling-gateway.po"
+        self.assertTrue(po.is_file(), "po/zh_Hans catalog is missing")
+        # A translation template must be committed for upstream feed inclusion.
+        pot = ROOT / "po/templates/wificalling-gateway.pot"
+        self.assertTrue(pot.is_file(), "po/templates catalog is missing")
+        text = po.read_text(encoding="utf-8")
+        self.assertIn('msgid "Settings"', text)
+        self.assertIn('msgstr "设置"', text)
+        # Protocol names and technical fields stay English in the catalog.
+        self.assertIn('msgid "UUID"', text)
+        self.assertIn('msgstr "UUID"', text)
+        # po2lmo.py must compile it to a non-empty, loadable .lmo archive.
+        with tempfile.TemporaryDirectory() as tmp:
+            lmo = Path(tmp) / "wificalling-gateway.zh-cn.lmo"
+            result = subprocess.run(
+                ["python3", str(ROOT / "scripts/po2lmo.py"), str(po), str(lmo)],
+                text=True, capture_output=True, check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            blob = lmo.read_bytes()
+            self.assertGreater(len(blob), 100)
+            # The .lmo ends with a big-endian uint32 giving the data section size,
+            # which must be smaller than the file (index + size marker follow it).
+            import struct
+            data_size = struct.unpack(">I", blob[-4:])[0]
+            self.assertLess(data_size, len(blob) - 4)
+
+    def test_node_import_errors_are_translatable(self):
+        js = (ROOT / "htdocs/luci-static/resources/wificalling-gateway/node-import.js") \
+            .read_text(encoding="utf-8")
+        # Error messages thrown to the user must be wrapped in _() so they
+        # translate in the Chinese interface instead of leaking raw English.
+        self.assertIn("throw new Error(_('Server and port are required'))", js)
+        self.assertIn("throw new Error(_('VMess server, port and UUID are required'))", js)
+        self.assertIn("throw new Error(_('Unsupported node link format'))", js)
 
     def test_public_project_documentation_exists(self):
         expected = [
             "README.md", "README_EN.md", "CHANGELOG.md", "SECURITY.md",
             "CONTRIBUTING.md", "docs/zh-CN/INSTALL.md", "docs/zh-CN/CONFIGURATION.md",
             "docs/zh-CN/BUILD.md", "docs/zh-CN/TROUBLESHOOTING.md",
+            "docs/zh-CN/SUBMITTING.md",
             "docs/en/INSTALL.md", "docs/en/CONFIGURATION.md", "docs/en/BUILD.md",
             "docs/en/TROUBLESHOOTING.md", ".github/workflows/ci.yml",
             "docs/images/overview.png", "docs/images/device-status.png",
@@ -337,6 +429,10 @@ class PackageTests(unittest.TestCase):
         ]
         for name in expected:
             self.assertTrue((ROOT / name).exists(), name)
+        # Makefile must declare a real maintainer and upstream URL for feed inclusion.
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        self.assertIn("PKG_MAINTAINER:=Smth Dagg <smthdagg@gmail.com>", makefile)
+        self.assertIn("LUCI_URL:=https://github.com/smthdagg/luci-app-wificalling-gateway", makefile)
 
     def test_openwrt_package_surface_exists(self):
         expected = [
@@ -472,6 +568,12 @@ class PackageTests(unittest.TestCase):
                 with tarfile.open(nested.name, "r:gz") as data_archive:
                     installed = data_archive.getmember("./etc/init.d/wificalling-gateway")
                     self.assertEqual((installed.uid, installed.gid), (0, 0))
+                    # The Chinese translation catalog must be compiled into the
+                    # package at both the legacy Lua and the modern LuCI i18n
+                    # paths so it loads regardless of the LuCI variant.
+                    names = data_archive.getnames()
+                    self.assertIn("./usr/lib/lua/luci/i18n/wificalling-gateway.zh-cn.lmo", names)
+                    self.assertIn("./usr/share/luci/i18n/wificalling-gateway.zh-cn.lmo", names)
         self.assertEqual(package.read_bytes()[:2], b"\x1f\x8b")
 
     def test_firewall_targets_only_listed_clients_and_both_transports(self):

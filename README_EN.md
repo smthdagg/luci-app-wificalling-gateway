@@ -36,15 +36,16 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 - ICMP/TCP reachability and latency observations.
 - Separate LuCI pages for settings, live Wi-Fi Calling status, and encrypted IMS activity.
 - UDP 500/4500 evidence with registration state, ePDG, ASSURED, packet totals, and last activity.
-- Logs only state changes and time-windowed sustained traffic; each device independently keeps 20 records by default, configurable in Settings.
+- Logs only handshake success/failure and sustained encrypted communication (ringing or calls lasting a few seconds); each device independently keeps 20 records by default, and the activity log can be turned off in Settings.
 - `sing-box check` before startup and mode `0600` for credential-bearing files.
 
 ## Compatibility
 
-| Component | v1.2 support |
+| Component | Support |
 |---|---|
 | Firmware | OpenWrt / ImmortalWrt with firewall4 and nftables |
 | Hardware tested | ImmortalWrt 24.10.6, Redmi AX6S, aarch64_cortex-a53 |
+| Source-compatible | ImmortalWrt 24.10 and 25.12 (ucode dispatcher i18n path, `luci.mk` `LUCI_LC_ALIAS.zh_Hans=zh-cn`, and `sing-box`/`firewall4`/`kmod-nft-tproxy` deps are identical) |
 | sing-box | 1.13.0 or newer recommended |
 | LuCI | Modern JavaScript views |
 | Network | IPv4 LAN policies; static DHCP leases required |
@@ -54,15 +55,40 @@ Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft
 
 ## Quick install
 
-Download the latest stable IPK from [Releases](../../releases) (currently 1.3.0), upload it to the router, then run:
+Download the latest stable IPK from [Releases](../../releases) (currently 1.4.0), upload it to the router, then run:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.3.0-2_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 Open **Services → Wi-Fi Calling Gateway**. Save a node first, then create a device policy. See the [installation](docs/en/INSTALL.md) and [configuration](docs/en/CONFIGURATION.md) guides.
+
+## Distribution feeds
+
+### 1. Releases IPK (default)
+Download the `.ipk` from [Releases](../../releases), `opkg install ./xxx.ipk`, then `/etc/init.d/rpcd restart` (above).
+
+### 2. Self-hosted opkg feed (fallback, always available)
+No upstream approval needed — host it yourself and users install directly.
+
+**Maintainer side**: place the `.ipk`s in a directory and generate an index with OpenWrt's `ipkg-make-index.sh`:
+```sh
+ipkg-make-index.sh . > Packages
+gzip -kf Packages   # produces Packages.gz
+# serve the directory (Packages, Packages.gz, *.ipk) over HTTPS via GitHub Pages or any static host
+```
+
+**User side**: add one line to `/etc/opkg/customfeeds.conf`, then install:
+```sh
+echo 'src/gz wificalling https://your.host/feed' >> /etc/opkg/customfeeds.conf
+opkg update
+opkg install luci-app-wificalling-gateway
+```
+
+### 3. ImmortalWrt official feed (path A)
+This repo follows the official luci feed conventions (`Makefile` with `PKG_MAINTAINER`/`LUCI_URL`/`luci.mk`, `po/zh_Hans/` + `po/templates/`, no committed `.lmo`), with the same dependency stack as the official `luci-app-homeproxy` (`sing-box + firewall4 + kmod-nft-tproxy`). See the [submission guide](docs/zh-CN/SUBMITTING.md).
 
 ## Important boundary
 
