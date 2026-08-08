@@ -70,9 +70,9 @@ opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
 
 > **⚠️ 定位要求（Wi-Fi Calling 生效前提）**
 >
-> 运营商要求设备定位与其服务区一致（如英国运营商需定位在英国）才能激活 Wi-Fi Calling。本插件通过英国节点提供英国 IP，但**不控制设备自身的定位**（GPS / 基站 / wloc）。设备需要通过虚拟定位将位置设为英国，否则 Wi-Fi Calling 无法触发。
+> 运营商要求设备定位与 SIM 卡归属地一致才能激活 Wi-Fi Calling。本插件通过对应国家的节点提供该国 IP，但**不控制设备自身的定位**（GPS / 基站 / wloc）。设备需要通过虚拟定位将位置设为 SIM 卡归属地，否则 Wi-Fi Calling 无法触发。
 >
-> **解决方法**：使用 [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) 配合小火箭（Shadowrocket）劫持 iOS 定位到英国。这是独立于本插件的项目。
+> **解决方法**：使用 [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) 配合小火箭（Shadowrocket）劫持 iOS 定位到 SIM 卡归属地。这是独立于本插件的项目。
 
 本插件只提供网络转发和可观察证据，不修改手机定位、运营商账户、IMS 配置或紧急呼叫地址。`likely_registered` 仅表示观察到双向 `ASSURED` UDP 4500；Wi‑Fi Calling 图标、UDP 500/4500 或高流量均不能单独证明号码已激活或电话一定能接通。请遵守运营商条款和所在地法律，并在真实设备上完成通话验证。
 

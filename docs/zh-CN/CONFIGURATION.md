@@ -49,11 +49,11 @@ ePDG/IPsec 隧道对丢包和抖动高度敏感。实测 **AnyTLS 协议**最适
 
 ### 设备定位
 
-运营商通过设备上报的定位（wloc）验证服务区（用于紧急呼叫）。本插件只提供英国 IP，不控制设备定位。设备需通过虚拟定位工具将位置设为英国，否则 Wi-Fi Calling 无法触发。
+运营商通过设备上报的定位（wloc）验证服务区（用于紧急呼叫）。本插件通过对应国家的节点提供该国 IP，但不控制设备定位。设备需通过虚拟定位工具将位置设为 SIM 卡归属地，否则 Wi-Fi Calling 无法触发。
 
 操作步骤：
 
-1. 在 iPhone 上使用 [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) 配合小火箭（Shadowrocket）将定位劫持到英国。这是独立于本插件的项目。
-2. 确认定位成功（地图显示英国位置）。
+1. 在 iPhone 上使用 [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) 配合小火箭（Shadowrocket）将定位劫持到 SIM 卡归属地。这是独立于本插件的项目。
+2. 确认定位成功（地图显示归属地位置）。
 3. **关闭小火箭**。如果不关闭，小火箭的 VPN 隧道会与路由器插件的 TPROXY 形成双重代理，导致流量冲突，ePDG 握手无法正常完成。
 4. 等待几分钟，路由器活动日志中会出现 ePDG 握手记录（handshake_success），Wi-Fi Calling 激活。

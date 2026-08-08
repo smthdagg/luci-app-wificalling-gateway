@@ -70,9 +70,9 @@ Open **Services → Wi-Fi Calling Gateway**. Save a node first, then create a de
 
 > **⚠️ Location requirement (prerequisite for Wi-Fi Calling)**
 >
-> The carrier requires the device location to match its service area (e.g., UK for a UK carrier) before Wi-Fi Calling can activate. This plugin provides a UK IP via the UK node, but **the device's own GPS / cell-tower location may still report a different position**, preventing Wi-Fi Calling from triggering.
+> The carrier requires the device location to match the SIM card's home country before Wi-Fi Calling can activate. This plugin provides an IP in the corresponding country via the proxy node, but **does not control the device's own location** (GPS / cell tower / wloc). The device must use a virtual location tool to set its position to the SIM card's home country, otherwise Wi-Fi Calling will not trigger.
 >
-> **Solution**: use [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) with Shadowrocket to spoof iOS location to the UK. This is a separate project independent of this plugin.
+> **Solution**: use [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) with Shadowrocket to spoof iOS location to the SIM card's home country. This is a separate project independent of this plugin.
 
 This package provides routing and observable network evidence only. It does not change device location, carrier accounts, IMS provisioning, or emergency addresses. `likely_registered` only means a bidirectional `ASSURED` UDP 4500 flow was observed. An icon, UDP 500/4500 traffic, or high packet counts do not prove carrier activation or call completion. Follow carrier terms and local law, and validate with a real call.
 
