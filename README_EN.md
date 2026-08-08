@@ -66,31 +66,6 @@ opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
 
 Open **Services → Wi-Fi Calling Gateway**. Save a node first, then create a device policy. See the [installation](docs/en/INSTALL.md) and [configuration](docs/en/CONFIGURATION.md) guides.
 
-## Distribution feeds
-
-### 1. Releases IPK (default)
-Download the `.ipk` from [Releases](../../releases), `opkg install ./xxx.ipk`, then `/etc/init.d/rpcd restart` (above).
-
-### 2. Self-hosted opkg feed (fallback, always available)
-No upstream approval needed — host it yourself and users install directly.
-
-**Maintainer side**: place the `.ipk`s in a directory and generate an index with OpenWrt's `ipkg-make-index.sh`:
-```sh
-ipkg-make-index.sh . > Packages
-gzip -kf Packages   # produces Packages.gz
-# serve the directory (Packages, Packages.gz, *.ipk) over HTTPS via GitHub Pages or any static host
-```
-
-**User side**: add one line to `/etc/opkg/customfeeds.conf`, then install:
-```sh
-echo 'src/gz wificalling https://your.host/feed' >> /etc/opkg/customfeeds.conf
-opkg update
-opkg install luci-app-wificalling-gateway
-```
-
-### 3. ImmortalWrt official feed (path A)
-This repo follows the official luci feed conventions (`Makefile` with `PKG_MAINTAINER`/`LUCI_URL`/`luci.mk`, `po/zh_Hans/` + `po/templates/`, no committed `.lmo`), with the same dependency stack as the official `luci-app-homeproxy` (`sing-box + firewall4 + kmod-nft-tproxy`). See the [submission guide](docs/zh-CN/SUBMITTING.md).
-
 ## Important boundary
 
 This package provides routing and observable network evidence only. It does not change device location, carrier accounts, IMS provisioning, or emergency addresses. `likely_registered` only means a bidirectional `ASSURED` UDP 4500 flow was observed. An icon, UDP 500/4500 traffic, or high packet counts do not prove carrier activation or call completion. Follow carrier terms and local law, and validate with a real call.
@@ -101,6 +76,7 @@ This package provides routing and observable network evidence only. It does not 
 - [Nodes, devices and PassWall](docs/en/CONFIGURATION.md)
 - [SDK and source builds](docs/en/BUILD.md)
 - [Troubleshooting](docs/en/TROUBLESHOOTING.md)
+- [Maintainer: distribution & upstream submission](docs/zh-CN/SUBMITTING.md)
 - [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 
 ## License

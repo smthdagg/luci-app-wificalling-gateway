@@ -66,31 +66,6 @@ opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
 
 然后进入 **服务 → Wi‑Fi Calling Gateway**。先添加并保存节点，再添加设备策略。详细步骤见[安装说明](docs/zh-CN/INSTALL.md)和[配置说明](docs/zh-CN/CONFIGURATION.md)。
 
-## 分发与安装源
-
-### 1. Releases IPK（默认）
-从 [Releases](../../releases) 下载 `.ipk`，`opkg install ./xxx.ipk` 后 `/etc/init.d/rpcd restart`（见上）。
-
-### 2. 自建 opkg 源（保底，随时可用）
-不依赖官方审批，自行托管即可让用户 `opkg install` 直装。
-
-**维护者侧**：把 `.ipk` 放到一个目录，用 OpenWrt 的 `ipkg-make-index.sh` 生成索引：
-```sh
-ipkg-make-index.sh . > Packages
-gzip -kf Packages   # 生成 Packages.gz
-# 用 GitHub Pages 或任意 HTTPS 静态服务器托管该目录（含 Packages、Packages.gz、*.ipk）
-```
-
-**用户侧**：在路由器 `/etc/opkg/customfeeds.conf` 加一行，再安装：
-```sh
-echo 'src/gz wificalling https://你的域名/feed' >> /etc/opkg/customfeeds.conf
-opkg update
-opkg install luci-app-wificalling-gateway
-```
-
-### 3. ImmortalWrt 官方源（路径 A）
-本仓库按官方 luci feed 规范组织（`Makefile` 含 `PKG_MAINTAINER`/`LUCI_URL`/`luci.mk`，`po/zh_Hans/` + `po/templates/`，不提交 `.lmo`），依赖栈与官方 `luci-app-homeproxy` 一致（`sing-box + firewall4 + kmod-nft-tproxy`）。提交流程见[贡献与上游说明](docs/zh-CN/SUBMITTING.md)。
-
 ## 重要边界
 
 本插件只提供网络转发和可观察证据，不修改手机定位、运营商账户、IMS 配置或紧急呼叫地址。`likely_registered` 仅表示观察到双向 `ASSURED` UDP 4500；Wi‑Fi Calling 图标、UDP 500/4500 或高流量均不能单独证明号码已激活或电话一定能接通。请遵守运营商条款和所在地法律，并在真实设备上完成通话验证。
@@ -101,6 +76,7 @@ opkg install luci-app-wificalling-gateway
 - [节点、设备和 PassWall 配置](docs/zh-CN/CONFIGURATION.md)
 - [SDK / 源码编译](docs/zh-CN/BUILD.md)
 - [常见问题与排错](docs/zh-CN/TROUBLESHOOTING.md)
+- [维护者：分发与上游提交](docs/zh-CN/SUBMITTING.md)
 - [安全策略](SECURITY.md) · [参与贡献](CONTRIBUTING.md) · [更新记录](CHANGELOG.md)
 
 ## 许可证
