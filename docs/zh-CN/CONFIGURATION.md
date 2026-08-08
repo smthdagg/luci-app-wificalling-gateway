@@ -49,4 +49,4 @@ ePDG/IPsec 隧道对丢包和抖动高度敏感。实测 **AnyTLS 协议**最适
 
 ### 设备定位
 
-运营商通过设备上报的定位验证服务区（用于紧急呼叫）。在 **飞行模式 + Wi-Fi** 下操作时，iOS 关闭蜂窝基站和 GPS 后会回退到 IP 定位；由于设备流量走英国节点，IP 定位为英国，与 ePDG 连接来源一致，运营商放行。若开着蜂窝，基站定位可能报告非英国位置，导致 iOS 不发起 ePDG 连接或运营商拒绝注册。
+运营商通过设备上报的定位（wloc）验证服务区（用于紧急呼叫）。本插件只提供英国 IP，不控制设备定位。设备需通过虚拟定位工具将位置设为英国，否则 Wi-Fi Calling 无法触发。解决方法：使用 [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) 配合小火箭（Shadowrocket）劫持 iOS 定位到英国。这是独立于本插件的项目。

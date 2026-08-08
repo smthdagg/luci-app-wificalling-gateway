@@ -20,4 +20,4 @@ The ePDG/IPsec tunnel is highly sensitive to packet loss and jitter. In practice
 
 ### Device location
 
-The carrier verifies the device-reported location (for emergency calls). Under **flight mode + Wi-Fi**, iOS falls back to IP-based location when cellular and GPS are unavailable; because device traffic routes through the UK node, the IP location is UK, matching the ePDG connection origin. With cellular on, cell-tower location may report a non-UK position, causing iOS to skip the ePDG attempt or the carrier to reject registration.
+The carrier verifies the device-reported location (wloc) for its service area (for emergency calls). This plugin only provides a UK IP and does not control device location. The device must use a virtual location tool to set its position to the UK, otherwise Wi-Fi Calling will not trigger. Solution: use [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) with Shadowrocket to spoof iOS location to the UK. This is a separate project.
