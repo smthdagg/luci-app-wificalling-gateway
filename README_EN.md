@@ -68,6 +68,12 @@ Open **Services → Wi-Fi Calling Gateway**. Save a node first, then create a de
 
 ## Important boundary
 
+> **⚠️ Location requirement (prerequisite for Wi-Fi Calling)**
+>
+> The carrier requires the device location to match its service area (e.g., UK for a UK carrier) before Wi-Fi Calling can activate. This plugin provides a UK IP via the UK node, but **the device's own GPS / cell-tower location may still report a different position**, preventing Wi-Fi Calling from triggering.
+>
+> **Workaround**: enable **flight mode + Wi-Fi** on the iPhone so iOS disables cellular and GPS, then falls back to IP-based location (UK via the proxy node), satisfying the carrier's location check. With cellular on, cell-tower location may report a non-UK position and Wi-Fi Calling will not activate.
+
 This package provides routing and observable network evidence only. It does not change device location, carrier accounts, IMS provisioning, or emergency addresses. `likely_registered` only means a bidirectional `ASSURED` UDP 4500 flow was observed. An icon, UDP 500/4500 traffic, or high packet counts do not prove carrier activation or call completion. Follow carrier terms and local law, and validate with a real call.
 
 ## Documentation
