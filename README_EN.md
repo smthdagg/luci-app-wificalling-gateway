@@ -2,7 +2,7 @@
 
 [中文](README.md) · [Install](docs/en/INSTALL.md) · [Configure](docs/en/CONFIGURATION.md) · [Build](docs/en/BUILD.md) · [Troubleshoot](docs/en/TROUBLESHOOTING.md)
 
-A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes selected LAN clients through selected sing-box outbounds while leaving other clients on the normal gateway or PassWall policy. It also reports observable ePDG/IPsec UDP 500/4500 evidence commonly associated with Wi-Fi Calling.
+A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes selected LAN clients through selected sing-box outbounds while leaving other clients on the normal gateway routing. It also reports observable ePDG/IPsec UDP 500/4500 evidence commonly associated with Wi-Fi Calling.
 
 ### Settings
 
@@ -31,7 +31,7 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 - AnyTLS, Hysteria2, TUIC, VLESS Reality and VMess WebSocket outbounds.
 - Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, and VMess share links with local browser-side parsing.
 - One selected node per device policy; multiple fixed private IPv4 addresses per policy.
-- **Independent tunnel** bypasses PassWall and uses the plugin node; **Follow gateway** is not intercepted.
+- **Independent tunnel** routes through the plugin node; **Follow gateway** is not intercepted and uses the router default routing.
 - One sing-box process, nftables TPROXY, transparent TCP and UDP routing.
 - ICMP/TCP reachability and latency observations.
 - Built-in Simplified Chinese interface (language pack shipped inside the IPK); Chinese descriptions and status, with protocol names and technical fields (TLS, UDP, UUID, SNI, ALPN, Reality, WebSocket, etc.) kept in English.
@@ -73,7 +73,7 @@ This package provides routing and observable network evidence only. It does not 
 ## Documentation
 
 - [Install and upgrade](docs/en/INSTALL.md)
-- [Nodes, devices and PassWall](docs/en/CONFIGURATION.md)
+- [Nodes and devices](docs/en/CONFIGURATION.md)
 - [Troubleshooting](docs/en/TROUBLESHOOTING.md)
 - [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
 

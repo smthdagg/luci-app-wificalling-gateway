@@ -2,7 +2,7 @@
 
 [English](README_EN.md) · [安装](docs/zh-CN/INSTALL.md) · [配置](docs/zh-CN/CONFIGURATION.md) · [编译](docs/zh-CN/BUILD.md) · [排错](docs/zh-CN/TROUBLESHOOTING.md)
 
-面向 OpenWrt / ImmortalWrt 的独立 LuCI 插件。它把指定局域网设备通过指定的 sing-box 节点转发，同时让其他设备继续遵循原网关或 PassWall 策略，并观察 Wi‑Fi Calling 常用的 ePDG/IPsec UDP 500、4500 会话证据。
+面向 OpenWrt / ImmortalWrt 的独立 LuCI 插件。它把指定局域网设备通过指定的 sing-box 节点转发，同时让其他设备继续走路由器默认路由，并观察 Wi‑Fi Calling 常用的 ePDG/IPsec UDP 500、4500 会话证据。
 
 ### 设置
 
@@ -31,7 +31,7 @@
 - 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket。
 - 支持直接粘贴 AnyTLS、Hysteria2/Hy2、TUIC、VLESS、VMess 分享链接并自动解析导入。
 - 每台设备可绑定一个节点；一个策略可包含多个固定私网 IPv4 地址。
-- `独立通道`：绕过 PassWall，使用插件节点；`跟随网关`：插件不拦截。
+- `独立通道`：通过插件节点转发；`跟随网关`：插件不拦截，设备走路由器默认路由。
 - 单个 sing-box 进程、nftables TPROXY、TCP 与 UDP 透明转发。
 - 节点 ICMP/TCP 可达性与延迟检测。
 - 内置简体中文界面（语言包随 IPK 安装）；中文说明与状态，协议名与技术字段（TLS、UDP、UUID、SNI、ALPN、Reality、WebSocket 等）保留英文。
@@ -73,7 +73,7 @@ opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
 ## 项目文档
 
 - [安装与升级](docs/zh-CN/INSTALL.md)
-- [节点、设备和 PassWall 配置](docs/zh-CN/CONFIGURATION.md)
+- [节点和设备配置](docs/zh-CN/CONFIGURATION.md)
 - [常见问题与排错](docs/zh-CN/TROUBLESHOOTING.md)
 - [安全策略](SECURITY.md) · [更新记录](CHANGELOG.md)
 

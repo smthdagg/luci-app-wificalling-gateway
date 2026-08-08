@@ -21,7 +21,7 @@ sing-box check -c /var/run/wificalling-gateway/sing-box.json
 
 ## 节点可达但不能上网
 
-Ping/TCP 端口成功不等于代理握手成功。检查节点协议、SNI、TLS 指纹、UUID/密码、服务端 UDP 能力和 MTU。确认设备使用的 IP 与策略一致，且没有重复的 PassWall ACL。
+Ping/TCP 端口成功不等于代理握手成功。检查节点协议、SNI、TLS 指纹、UUID/密码、服务端 UDP 能力和 MTU。确认设备使用的 IP 与策略一致。
 
 ## 有 Wi-Fi Calling 图标但电话失败
 
