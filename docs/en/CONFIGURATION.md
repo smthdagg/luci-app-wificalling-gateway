@@ -11,3 +11,15 @@ The states progress from `no_session` to `negotiating` (UDP 500), `nat_t_seen` (
 The monitor records handshake success/failure transitions once. Encrypted traffic must persist for a few seconds (≥3 s threshold, about 5 s with 5 s polling) before it is treated as sustained communication, then packet deltas are aggregated into a configurable time window (60 seconds by default). Each device independently retains a configurable number of newest records (20 by default), and the activity log can be turned off in Settings. Calls and SMS are encrypted inside IPsec, so the router cannot identify numbers or content and cannot reliably distinguish a call from a text message. Clearing this history does not modify system logs, nodes, or device policies.
 
 Independent clients receive temporary `WFC_GATEWAY_BYPASS` return rules in PassWall. The monitor restores them after a PassWall reload and removes them when the plugin stops.
+
+## Wi-Fi Calling tips
+
+The following are device-side observations, **not plugin features**.
+
+### Protocol choice
+
+The ePDG/IPsec tunnel is highly sensitive to packet loss and jitter. In practice **AnyTLS** works best: it encapsulates UDP (ePDG 500/4500) inside a TCP/TLS stream, providing reliable, ordered delivery so IPsec keepalives are never lost. UDP/QUIC-based protocols (Hysteria2, TUIC) suffer from UDP-in-UDP issues where public-network packet loss causes repeated tunnel drops.
+
+### Device location
+
+The carrier verifies the device-reported location (for emergency calls). Under **flight mode + Wi-Fi**, iOS falls back to IP-based location when cellular and GPS are unavailable; because device traffic routes through the UK node, the IP location is UK, matching the ePDG connection origin. With cellular on, cell-tower location may report a non-UK position, causing iOS to skip the ePDG attempt or the carrier to reject registration.

@@ -42,3 +42,15 @@ Proxy nodes 列表直接显示节点存活状态、Ping/延迟和质量等级。
 ## 与 PassWall 共存
 
 独立设备运行时，插件在 PassWall 的 `PSW_MANGLE` 与 `PSW_NAT` 中临时插入带 `WFC_GATEWAY_BYPASS` 注释的 return 规则。PassWall 重载后监控进程会恢复这些规则；插件停止时会删除。不要另外建立重复 ACL。
+
+## Wi-Fi Calling 操作要点
+
+以下为设备侧操作经验，**不是插件功能**，仅供配置参考。
+
+### 节点协议选择
+
+ePDG/IPsec 隧道对丢包和抖动高度敏感。实测 **AnyTLS 协议**最适合 Wi-Fi Calling：它将 UDP（ePDG 500/4500）封装在 TCP/TLS 流中，提供可靠有序的传输，IPsec keepalive 不会丢失。基于 UDP/QUIC 的协议（Hysteria2、TUIC）会出现 UDP-in-UDP 问题，公网丢包导致隧道反复掉线。建议为 Wi-Fi Calling 设备选择 AnyTLS 节点。
+
+### 设备定位
+
+运营商通过设备上报的定位验证服务区（用于紧急呼叫）。在 **飞行模式 + Wi-Fi** 下操作时，iOS 关闭蜂窝基站和 GPS 后会回退到 IP 定位；由于设备流量走英国节点，IP 定位为英国，与 ePDG 连接来源一致，运营商放行。若开着蜂窝，基站定位可能报告非英国位置，导致 iOS 不发起 ePDG 连接或运营商拒绝注册。
