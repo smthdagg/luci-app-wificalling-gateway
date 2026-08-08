@@ -26,7 +26,7 @@
 
 该截图证明终端已显示 Wi‑Fi Calling 注册状态；是否完成号码激活及呼叫能力，仍应以实际通话或运营商确认结果为准。
 
-## v1.2 功能
+## 功能
 
 - 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket。
 - 支持直接粘贴 AnyTLS、Hysteria2/Hy2、TUIC、VLESS、VMess 分享链接并自动解析导入。
@@ -34,6 +34,7 @@
 - `独立通道`：绕过 PassWall，使用插件节点；`跟随网关`：插件不拦截。
 - 单个 sing-box 进程、nftables TPROXY、TCP 与 UDP 透明转发。
 - 节点 ICMP/TCP 可达性与延迟检测。
+- 内置简体中文界面（语言包随 IPK 安装）；中文说明与状态，协议名与技术字段（TLS、UDP、UUID、SNI、ALPN、Reality、WebSocket 等）保留英文。
 - 设置、Wi‑Fi Calling 状态、加密 IMS 活动日志分为三个独立管理页面。
 - 观察 UDP 500/4500，显示注册状态、ePDG、ASSURED、包计数及最后活动时间。
 - 只记录握手成功/失败与持续加密通讯（响铃或通话，持续数秒以上）；每台设备默认独立保留最近 20 条，可在设置中调整或关闭活动日志。

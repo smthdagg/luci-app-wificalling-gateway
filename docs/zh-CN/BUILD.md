@@ -16,8 +16,8 @@ make package/luci-app-wificalling-gateway/compile V=s
 macOS/Linux 可运行：
 
 ```sh
-./scripts/build-ipk.sh 1.0.0-1
-shasum -a 256 dist/luci-app-wificalling-gateway_1.0.0-1_all.ipk
+./scripts/build-ipk.sh 1.4.0-1
+shasum -a 256 dist/luci-app-wificalling-gateway_1.4.0-1_all.ipk
 ```
 
 该包只包含 Shell/LuCI 资源，但依赖包仍必须与目标固件匹配。安装后务必执行 `sing-box check` 和实际路由验证。

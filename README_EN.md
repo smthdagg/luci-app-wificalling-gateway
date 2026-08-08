@@ -26,7 +26,7 @@ The following screenshot shows **EE WiFiCall** displayed on an actual iPhone whi
 
 This demonstrates the Wi-Fi Calling registration indicator on the device. Carrier activation and calling capability must still be confirmed by a completed call or by the carrier.
 
-## v1.2 features
+## Features
 
 - AnyTLS, Hysteria2, TUIC, VLESS Reality and VMess WebSocket outbounds.
 - Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, and VMess share links with local browser-side parsing.
@@ -34,6 +34,7 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 - **Independent tunnel** bypasses PassWall and uses the plugin node; **Follow gateway** is not intercepted.
 - One sing-box process, nftables TPROXY, transparent TCP and UDP routing.
 - ICMP/TCP reachability and latency observations.
+- Built-in Simplified Chinese interface (language pack shipped inside the IPK); Chinese descriptions and status, with protocol names and technical fields (TLS, UDP, UUID, SNI, ALPN, Reality, WebSocket, etc.) kept in English.
 - Separate LuCI pages for settings, live Wi-Fi Calling status, and encrypted IMS activity.
 - UDP 500/4500 evidence with registration state, ePDG, ASSURED, packet totals, and last activity.
 - Logs only handshake success/failure and sustained encrypted communication (ringing or calls lasting a few seconds); each device independently keeps 20 records by default, and the activity log can be turned off in Settings.

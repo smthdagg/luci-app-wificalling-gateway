@@ -9,8 +9,8 @@ make package/luci-app-wificalling-gateway/compile V=s
 For the portable Shell/LuCI package envelope:
 
 ```sh
-./scripts/build-ipk.sh 1.0.0-1
-shasum -a 256 dist/luci-app-wificalling-gateway_1.0.0-1_all.ipk
+./scripts/build-ipk.sh 1.4.0-1
+shasum -a 256 dist/luci-app-wificalling-gateway_1.4.0-1_all.ipk
 ```
 
 Runtime dependencies must still match the target firmware. Test with:
