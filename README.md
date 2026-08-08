@@ -74,10 +74,8 @@ opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
 
 - [安装与升级](docs/zh-CN/INSTALL.md)
 - [节点、设备和 PassWall 配置](docs/zh-CN/CONFIGURATION.md)
-- [SDK / 源码编译](docs/zh-CN/BUILD.md)
 - [常见问题与排错](docs/zh-CN/TROUBLESHOOTING.md)
-- [维护者：分发与上游提交](docs/zh-CN/SUBMITTING.md)
-- [安全策略](SECURITY.md) · [参与贡献](CONTRIBUTING.md) · [更新记录](CHANGELOG.md)
+- [安全策略](SECURITY.md) · [更新记录](CHANGELOG.md)
 
 ## 许可证
 

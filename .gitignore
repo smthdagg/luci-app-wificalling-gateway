@@ -10,3 +10,16 @@ dist/*
 *.backup
 *.uci
 *.conf.local
+
+# Developer-only (kept locally, not published to users)
+scripts/
+tests/
+docs/zh-CN/BUILD.md
+docs/zh-CN/SUBMITTING.md
+docs/en/BUILD.md
+docs/testing/
+docs/releases/
+CONTRIBUTING.md
+.github/workflows/
+.github/PULL_REQUEST_TEMPLATE.md
+outputs/

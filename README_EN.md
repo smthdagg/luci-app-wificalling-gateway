@@ -74,10 +74,8 @@ This package provides routing and observable network evidence only. It does not 
 
 - [Install and upgrade](docs/en/INSTALL.md)
 - [Nodes, devices and PassWall](docs/en/CONFIGURATION.md)
-- [SDK and source builds](docs/en/BUILD.md)
 - [Troubleshooting](docs/en/TROUBLESHOOTING.md)
-- [Maintainer: distribution & upstream submission](docs/zh-CN/SUBMITTING.md)
-- [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
+- [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
 
 ## License
 
