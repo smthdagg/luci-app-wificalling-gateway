@@ -49,7 +49,7 @@ Proxy nodes 列表直接显示节点存活状态、Ping/延迟和质量等级。
 
 ### 节点协议选择
 
-ePDG/IPsec 隧道对丢包和抖动高度敏感。实测 **AnyTLS 协议**最适合 Wi-Fi Calling：它将 UDP（ePDG 500/4500）封装在 TCP/TLS 流中，提供可靠有序的传输，IPsec keepalive 不会丢失。基于 UDP/QUIC 的协议（Hysteria2、TUIC）会出现 UDP-in-UDP 问题，公网丢包导致隧道反复掉线。建议为 Wi-Fi Calling 设备选择 AnyTLS 节点。
+ePDG/IPsec 隧道对丢包和抖动高度敏感。实测 **AnyTLS 协议**最适合 Wi-Fi Calling：它将 UDP（ePDG 500/4500）封装在 TCP/TLS 流中，提供可靠有序的传输，IPsec keepalive 不会丢失，语音媒体（RTP）也能稳定传输。基于 UDP/QUIC 的协议（Hysteria2、TUIC）虽然能建立 ePDG 隧道并显示 Wi-Fi Calling 图标，但**拨打电话会立即中断**——UDP-in-UDP 的公网抖动和丢包会导致 RTP 语音流无法维持。建议为 Wi-Fi Calling 设备选择 AnyTLS 节点。
 
 ### 设备定位
 

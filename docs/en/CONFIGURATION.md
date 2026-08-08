@@ -18,7 +18,7 @@ The following are device-side observations, **not plugin features**.
 
 ### Protocol choice
 
-The ePDG/IPsec tunnel is highly sensitive to packet loss and jitter. In practice **AnyTLS** works best: it encapsulates UDP (ePDG 500/4500) inside a TCP/TLS stream, providing reliable, ordered delivery so IPsec keepalives are never lost. UDP/QUIC-based protocols (Hysteria2, TUIC) suffer from UDP-in-UDP issues where public-network packet loss causes repeated tunnel drops.
+The ePDG/IPsec tunnel is highly sensitive to packet loss and jitter. In practice **AnyTLS** works best: it encapsulates UDP (ePDG 500/4500) inside a TCP/TLS stream, providing reliable, ordered delivery so both IPsec keepalives and voice media (RTP) are transmitted without loss. UDP/QUIC-based protocols (Hysteria2, TUIC) can establish the ePDG tunnel and display the Wi-Fi Calling indicator, but **placing a call causes an immediate disconnect** -- UDP-in-UDP jitter and loss on the public network cannot sustain the RTP voice stream.
 
 ### Device location
 
