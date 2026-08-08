@@ -56,11 +56,20 @@ Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft
 
 ## Quick install
 
-Download the latest stable IPK from [Releases](../../releases) (currently 1.4.0), upload it to the router, then run:
+Download the latest stable release (currently 1.4.0) from [Releases](../../releases), upload it to the router, then install. Use `.ipk` for 24.10, `.apk` for 25.12.
+
+**24.10 (opkg)**:
 
 ```sh
 opkg update
 opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
+/etc/init.d/rpcd restart
+```
+
+**25.12 (apk)**:
+
+```sh
+apk add ./luci-app-wificalling-gateway_1.4.0-r1_all.apk
 /etc/init.d/rpcd restart
 ```
 

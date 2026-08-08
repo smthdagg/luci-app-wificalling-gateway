@@ -56,11 +56,20 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版，上传到路由器后执行（当前为 1.4.0）：
+从 [Releases](../../releases) 下载最新稳定版（当前为 1.4.0），上传到路由器后安装。24.10 用 `.ipk`，25.12 用 `.apk`。
+
+**24.10（opkg）**：
 
 ```sh
 opkg update
 opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
+/etc/init.d/rpcd restart
+```
+
+**25.12（apk）**：
+
+```sh
+apk add ./luci-app-wificalling-gateway_1.4.0-r1_all.apk
 /etc/init.d/rpcd restart
 ```
 
