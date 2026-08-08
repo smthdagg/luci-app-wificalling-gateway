@@ -20,4 +20,11 @@ The ePDG/IPsec tunnel is highly sensitive to packet loss and jitter. In practice
 
 ### Device location
 
-The carrier verifies the device-reported location (wloc) for its service area (for emergency calls). This plugin only provides a UK IP and does not control device location. The device must use a virtual location tool to set its position to the UK, otherwise Wi-Fi Calling will not trigger. Solution: use [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) with Shadowrocket to spoof iOS location to the UK. This is a separate project.
+The carrier verifies the device-reported location (wloc) for its service area (for emergency calls). This plugin only provides a UK IP and does not control device location. The device must use a virtual location tool to set its position to the UK, otherwise Wi-Fi Calling will not trigger.
+
+Steps:
+
+1. On the iPhone, use [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) with Shadowrocket to spoof the location to the UK. This is a separate project.
+2. Confirm the location is set (map shows UK).
+3. **Turn off Shadowrocket.** If left on, its VPN tunnel conflicts with the router plugin's TPROXY, causing a double-proxy issue that prevents the ePDG handshake from completing.
+4. Wait a few minutes; the router activity log will show an ePDG handshake (handshake_success) and Wi-Fi Calling activates.
