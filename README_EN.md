@@ -49,7 +49,8 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 | 25.12 line (apk/APK) | One shared `noarch` `.apk` for OpenWrt / ImmortalWrt 25.12 — all targets verified |
 | 25.12 targets tested | x86_64 ✅ aarch64 ✅ armv7 ✅ mipsel ✅ (official 25.12.3 rootfs via qemu user-mode emulation) |
 | Hardware tested | ImmortalWrt 24.10.6, Redmi AX6S, aarch64_cortex-a53 (real router) |
-| Container/emulation tested | Official OpenWrt 24.10.8 / 25.12.3 rootfs; iStoreOS 24.10.5 / 24.10.7 (Docker and full QEMU firmware) |
+| iStoreOS verified | **24.10.7 full firmware (QEMU full-system emulation, same version as the reported issue)**: install + service active + LuCI Settings/Status/Activity Log pages verified in Simplified Chinese |
+| Container/emulation tested | Official OpenWrt 24.10.8 / 25.12.3 rootfs; iStoreOS 24.10.5 (Docker), 24.10.7 (full QEMU firmware) |
 | sing-box | 1.13.0 or newer recommended; the IPK leaves it unversioned (compatible with older sing-box in some feeds); the 25.12 official feed ships sing-box (1.12.17 auto-installed on armv7/mipsel in tests) |
 | LuCI | Modern JavaScript views |
 | Network | IPv4 LAN policies; static DHCP leases required |
@@ -73,6 +74,13 @@ opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 
 ```sh
 opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
+```
+
+If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (verified), install by extracting instead (verified on 24.10.7 full firmware):
+
+```sh
+cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.tar.gz -C /
+/etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 ```
 
 **OpenWrt / ImmortalWrt 25.12.x (apk / APK)** — one `noarch` package covering x86_64 / aarch64 / armv7 / mipsel, all tested:

@@ -30,6 +30,15 @@ opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
 ```
 
+若 iStoreOS 的定制 opkg 对本地文件报 `incompatible with the architectures configured`（24.10.7 完整固件实测确认），可改用**解包安装**（同样实测通过）：
+
+```sh
+cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.tar.gz -C /
+/etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
+```
+
+> 注意：解包安装不写 opkg 数据库，卸载时需手动删除插件文件（`/usr/libexec/wificalling-gateway`、`/www/luci-static/resources/*/wificalling-gateway`、`/etc/config/wificalling-gateway`、`/etc/init.d/wificalling-gateway`、语言包与 menu/ACL JSON）。
+
 若依赖在当前软件源不存在（例如 sing-box），请先为当前固件版本和 CPU 架构安装匹配依赖，禁止混装不同固件分支的内核模块。
 
 ## 安装 Release APK（25.12 系）

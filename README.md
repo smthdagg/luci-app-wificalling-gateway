@@ -49,7 +49,8 @@
 | 25.12 系（apk/APK） | OpenWrt / ImmortalWrt 25.12 共用一个 noarch APK，四种芯片全部实测 |
 | 25.12 芯片实测 | x86_64 ✅ aarch64 ✅ armv7 ✅ mipsel ✅（官方 25.12.3 rootfs + qemu 用户态模拟） |
 | 已实机验证 | ImmortalWrt 24.10.6，Redmi AX6S，aarch64_cortex-a53（真实路由器） |
-| 容器/模拟验证 | OpenWrt 24.10.8 / 25.12.3 官方 rootfs；iStoreOS 24.10.5 / 24.10.7（Docker 与 QEMU 完整固件） |
+| iStoreOS 实测 | **24.10.7 完整固件（QEMU 全系统模拟，与用户报错同版本）**：安装 + 服务 active + LuCI 设置/状态/活动日志页面全中文实测通过 |
+| 容器/模拟验证 | OpenWrt 24.10.8 / 25.12.3 官方 rootfs；iStoreOS 24.10.5（Docker）、24.10.7（QEMU 完整固件） |
 | sing-box | 建议 1.13.0 或更高；IPK 不锁版本（兼容各源较旧版本），25.12 官方源自带（armv7/mipsel 实测自动装 1.12.17） |
 | LuCI | JavaScript 视图（现代 LuCI） |
 | 网络 | IPv4 LAN 策略；设备必须使用 DHCP 静态租约 |
@@ -73,6 +74,13 @@ opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 >
 > ```sh
 > opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
+> ```
+>
+> 若 iStoreOS 的定制 opkg 对本地文件报 `incompatible with the architectures configured`（已实测），可改用**解包安装**（24.10.7 完整固件实测通过）：
+>
+> ```sh
+> cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.tar.gz -C /
+> /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 > ```
 
 **OpenWrt / ImmortalWrt 25.12.x（apk / APK）** —— 一个 noarch 包，覆盖 x86_64 / aarch64 / armv7 / mipsel 全芯片，已全部实测：

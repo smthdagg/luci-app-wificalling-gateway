@@ -30,6 +30,15 @@ opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
 ```
 
+If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (confirmed on the 24.10.7 full firmware), install by extracting instead (also verified):
+
+```sh
+cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.tar.gz -C /
+/etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
+```
+
+> Note: extracting does not write the opkg database; to uninstall, remove the plugin files manually (`/usr/libexec/wificalling-gateway`, `/www/luci-static/resources/*/wificalling-gateway`, `/etc/config/wificalling-gateway`, `/etc/init.d/wificalling-gateway`, the language packs and menu/ACL JSON).
+
 If a dependency is missing from the current feed (e.g. sing-box), install a matching build for your firmware version and CPU architecture first. Never mix kernel packages from different firmware branches.
 
 ## Install the Release APK (25.12 line)

@@ -1,6 +1,11 @@
 # Troubleshooting
 
 - **Install fails with `wfopen: ... No such file or directory` (common on iStoreOS)**: opkg cannot open the file — usually a file-location problem, not a package-format problem. Confirm the file actually exists (`ls -la <path>`), or upload via LuCI System → Software → Upload (the dialog shows MD5/SHA256 when the file is present), then install by absolute path: `opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk`. Avoid `./` relative paths; mind tmpfs mounts when uploading to `/tmp`.
+- **iStoreOS reports `incompatible with the architectures configured`**: the iStoreOS custom opkg (koolcenter build) applies its own architecture check to local-file installs (`all` and concrete arches may both be rejected); the package itself parses fine (verified). Use the extract install instead (verified on 24.10.7 full firmware):
+  ```sh
+  cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.tar.gz -C /
+  /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
+  ```
 - **25.12 install fails with `uninstallable, arch: all`**: the 25.12 apk rejects `arch: all` packages. Use the **noarch** build: `apk add --allow-untrusted ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk` (one package covers x86_64 / aarch64 / armv7 / mipsel).
 - **Install fails with `cannot find dependency sing-box`**: 24.10-line feeds (including iStoreOS) may not ship sing-box; install a matching sing-box for your firmware/CPU and retry. The 25.12 official feed ships sing-box and resolves it automatically. Never mix packages from different firmware branches.
 - Missing LuCI page or ACL error: restart `rpcd` and `uhttpd`, log out, and start a fresh LuCI session.

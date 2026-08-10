@@ -8,6 +8,15 @@ opkg 打不开文件，通常**不是包格式问题**，而是文件没真正�
 - 避免 `./` 相对路径（当前目录可能不是文件所在目录），用绝对路径安装：`opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk`。
 - 上传到 `/tmp` 时注意 tmpfs 挂载与上传工具的写入目标是否一致。
 
+## iStoreOS 报 `incompatible with the architectures configured`
+
+iStoreOS 的定制 opkg（koolcenter 版）对**本地文件安装**有架构检查限制（`all` 与具体架构都可能被拒），不影响包本身（格式已实测解析正常）。已实测可用的**解包安装**：
+
+```sh
+cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.tar.gz -C /
+/etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
+```
+
 ## 25.12 安装报 `uninstallable, arch: all`
 
 OpenWrt 25.12 的 apk 不接受 `arch: all` 的包。请使用 **noarch** 版：
