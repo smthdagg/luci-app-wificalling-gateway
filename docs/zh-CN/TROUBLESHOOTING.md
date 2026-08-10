@@ -1,5 +1,27 @@
 # 排错
 
+## 安装报 `wfopen: ... No such file or directory`（iStoreOS 常见）
+
+opkg 打不开文件，通常**不是包格式问题**，而是文件没真正到位：
+
+- 用 `ls -la <路径>` 确认文件真实存在，或通过 LuCI「系统 → 软件包 → 上传软件包」上传（上传对话框会显示 MD5/SHA256，能显示即文件已到位）。
+- 避免 `./` 相对路径（当前目录可能不是文件所在目录），用绝对路径安装：`opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk`。
+- 上传到 `/tmp` 时注意 tmpfs 挂载与上传工具的写入目标是否一致。
+
+## 25.12 安装报 `uninstallable, arch: all`
+
+OpenWrt 25.12 的 apk 不接受 `arch: all` 的包。请使用 **noarch** 版：
+
+```sh
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk
+```
+
+一个 noarch 包覆盖 x86_64 / aarch64 / armv7 / mipsel 全芯片。
+
+## 安装报 `cannot find dependency sing-box`
+
+24.10 系的源（含 iStoreOS）可能不提供 sing-box，需要自行安装与固件架构匹配的 sing-box 后重试。25.12 官方源自带 sing-box（自动解析）。禁止混装不同固件分支的包。
+
 ## LuCI 页面不出现或报权限错误
 
 重启 rpcd 和 uhttpd，并退出 LuCI 后重新登录，旧会话可能缓存 ACL：

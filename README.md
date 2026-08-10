@@ -34,7 +34,7 @@
 - `独立通道`：通过插件节点转发；`跟随网关`：插件不拦截，设备走路由器默认路由。
 - 单个 sing-box 进程、nftables TPROXY、TCP 与 UDP 透明转发。
 - 节点 ICMP/TCP 可达性与延迟检测。
-- 内置简体中文界面（语言包随 IPK 安装）；中文说明与状态，协议名与技术字段（TLS、UDP、UUID、SNI、ALPN、Reality、WebSocket 等）保留英文。
+- 内置简体中文界面（语言包随安装包提供）；中文说明与状态，协议名与技术字段（TLS、UDP、UUID、SNI、ALPN、Reality、WebSocket 等）保留英文。
 - 设置、Wi‑Fi Calling 状态、加密 IMS 活动日志分为三个独立管理页面。
 - 观察 UDP 500/4500，显示注册状态、ePDG、ASSURED、包计数及最后活动时间。
 - 只记录握手成功/失败与持续加密通讯（响铃或通话，持续数秒以上）；每台设备默认独立保留最近 20 条，可在设置中调整或关闭活动日志。
@@ -44,21 +44,24 @@
 
 | 项目 | 支持范围 |
 |---|---|
-| 固件 | OpenWrt / ImmortalWrt，firewall4 + nftables |
-| 已实机验证 | ImmortalWrt 24.10.6，Redmi AX6S，aarch64_cortex-a53 |
-| 源码兼容 | ImmortalWrt 24.10 与 25.12（ucode dispatcher 的 i18n 加载路径、`luci.mk` 的 `LUCI_LC_ALIAS.zh_Hans=zh-cn`、`sing-box`/`firewall4`/`kmod-nft-tproxy` 依赖均一致） |
-| sing-box | 建议 1.13.0 或更高版本 |
+| 固件 | OpenWrt / ImmortalWrt / iStoreOS，firewall4 + nftables |
+| 24.10 系（opkg/IPK） | OpenWrt 24.10、ImmortalWrt 24.10、iStoreOS 24.10 共用一个 IPK，全部实测 |
+| 25.12 系（apk/APK） | OpenWrt / ImmortalWrt 25.12 共用一个 noarch APK，四种芯片全部实测 |
+| 25.12 芯片实测 | x86_64 ✅ aarch64 ✅ armv7 ✅ mipsel ✅（官方 25.12.3 rootfs + qemu 用户态模拟） |
+| 已实机验证 | ImmortalWrt 24.10.6，Redmi AX6S，aarch64_cortex-a53（真实路由器） |
+| 容器/模拟验证 | OpenWrt 24.10.8 / 25.12.3 官方 rootfs；iStoreOS 24.10.5 / 24.10.7（Docker 与 QEMU 完整固件） |
+| sing-box | 建议 1.13.0 或更高；IPK 不锁版本（兼容各源较旧版本），25.12 官方源自带（armv7/mipsel 实测自动装 1.12.17） |
 | LuCI | JavaScript 视图（现代 LuCI） |
 | 网络 | IPv4 LAN 策略；设备必须使用 DHCP 静态租约 |
-| 包架构 | `all`（Shell 与 LuCI 资源）；运行能力取决于目标 sing-box 包 |
+| 包架构 | IPK `all`（Shell 与 LuCI 资源）；APK `noarch`（25.12 apk 不接受 `all`，官方包按目标架构分发） |
 
 依赖：`luci-base`、`sing-box`、`firewall4`、`kmod-nft-tproxy`、`kmod-nft-socket`、`ip-full`。
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版（当前为 1.5.0），上传到路由器后安装。24.10 用 `.ipk`，25.12 用 `.apk`。
+从 [Releases](../../releases) 下载最新稳定版（当前为 1.5.0），上传到路由器后安装。**24.10 全系用一个 `.ipk`，25.12 全系用一个 `.apk`（noarch，不分芯片）**。
 
-**24.10（opkg）**：
+**OpenWrt / ImmortalWrt / iStoreOS 24.10.x（opkg / IPK）** —— 一个包通用，已实机验证：
 
 ```sh
 opkg update
@@ -66,16 +69,17 @@ opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
-**iStoreOS 24.10.x（opkg）**：与 OpenWrt/ImmortalWrt 使用**同一个 IPK**。部分 opkg 对 `./` 相对路径或上传位置会报误导性的 "No such file or directory"，请确认文件真实上传成功后用绝对路径安装：
+> iStoreOS 提示：部分 opkg 对 `./` 相对路径或上传位置会报误导性的 "No such file or directory"。请确认文件**真实上传成功**后再用绝对路径安装：
+>
+> ```sh
+> opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
+> ```
+
+**OpenWrt / ImmortalWrt 25.12.x（apk / APK）** —— 一个 noarch 包，覆盖 x86_64 / aarch64 / armv7 / mipsel 全芯片，已全部实测：
 
 ```sh
-opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
-```
-
-**25.12（apk）**：
-
-```sh
-apk add ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk
+apk update
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 

@@ -44,21 +44,24 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 
 | Component | Support |
 |---|---|
-| Firmware | OpenWrt / ImmortalWrt with firewall4 and nftables |
-| Hardware tested | ImmortalWrt 24.10.6, Redmi AX6S, aarch64_cortex-a53 |
-| Source-compatible | ImmortalWrt 24.10 and 25.12 (ucode dispatcher i18n path, `luci.mk` `LUCI_LC_ALIAS.zh_Hans=zh-cn`, and `sing-box`/`firewall4`/`kmod-nft-tproxy` deps are identical) |
-| sing-box | 1.13.0 or newer recommended |
+| Firmware | OpenWrt / ImmortalWrt / iStoreOS with firewall4 and nftables |
+| 24.10 line (opkg/IPK) | One shared `.ipk` for OpenWrt 24.10, ImmortalWrt 24.10 and iStoreOS 24.10 — all verified |
+| 25.12 line (apk/APK) | One shared `noarch` `.apk` for OpenWrt / ImmortalWrt 25.12 — all targets verified |
+| 25.12 targets tested | x86_64 ✅ aarch64 ✅ armv7 ✅ mipsel ✅ (official 25.12.3 rootfs via qemu user-mode emulation) |
+| Hardware tested | ImmortalWrt 24.10.6, Redmi AX6S, aarch64_cortex-a53 (real router) |
+| Container/emulation tested | Official OpenWrt 24.10.8 / 25.12.3 rootfs; iStoreOS 24.10.5 / 24.10.7 (Docker and full QEMU firmware) |
+| sing-box | 1.13.0 or newer recommended; the IPK leaves it unversioned (compatible with older sing-box in some feeds); the 25.12 official feed ships sing-box (1.12.17 auto-installed on armv7/mipsel in tests) |
 | LuCI | Modern JavaScript views |
 | Network | IPv4 LAN policies; static DHCP leases required |
-| Package arch | `all`; runtime support still depends on the target sing-box package |
+| Package arch | IPK `all`; APK `noarch` (the 25.12 apk rejects `arch: all`; official 25.12 packages are built per target) |
 
 Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft-socket`, `ip-full`.
 
 ## Quick install
 
-Download the latest stable release (currently 1.5.0) from [Releases](../../releases), upload it to the router, then install. Use `.ipk` for 24.10, `.apk` for 25.12.
+Download the latest stable release (currently 1.5.0) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
 
-**24.10 (opkg)**:
+**OpenWrt / ImmortalWrt / iStoreOS 24.10.x (opkg / IPK)** — one shared package, verified on real hardware:
 
 ```sh
 opkg update
@@ -66,16 +69,17 @@ opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
-**iStoreOS 24.10.x (opkg)**: uses the **same IPK** as OpenWrt/ImmortalWrt. Some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations — make sure the file was actually uploaded, then install by absolute path:
+**iStoreOS note**: some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations — make sure the file was actually uploaded, then install by absolute path:
 
 ```sh
 opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
 ```
 
-**25.12 (apk)**:
+**OpenWrt / ImmortalWrt 25.12.x (apk / APK)** — one `noarch` package covering x86_64 / aarch64 / armv7 / mipsel, all tested:
 
 ```sh
-apk add ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk
+apk update
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 
