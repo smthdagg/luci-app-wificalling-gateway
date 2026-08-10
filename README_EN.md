@@ -56,29 +56,29 @@ Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft
 
 ## Quick install
 
-Download the latest stable release (currently 1.4.0) from [Releases](../../releases), upload it to the router, then install. Use `.ipk` for 24.10, `.apk` for 25.12.
+Download the latest stable release (currently 1.5.0) from [Releases](../../releases), upload it to the router, then install. Use `.ipk` for 24.10, `.apk` for 25.12.
 
 **24.10 (opkg)**:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
-**iStoreOS 24.10.x (opkg)**: use the dedicated package `luci-app-wificalling-gateway_1.4.0-1_istoreos_all.ipk` and place it in `/tmp` first — some opkg builds reject a `./` relative path with a misleading "No such file or directory":
+**iStoreOS 24.10.x (opkg)**: use the dedicated package `luci-app-wificalling-gateway_1.5.0-1_istoreos_all.ipk` and place it in `/tmp` first — some opkg builds reject a `./` relative path with a misleading "No such file or directory":
 
 ```sh
 opkg update
 cd /tmp
-opkg install /tmp/luci-app-wificalling-gateway_1.4.0-1_istoreos_all.ipk
+opkg install /tmp/luci-app-wificalling-gateway_1.5.0-1_istoreos_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 **25.12 (apk)**:
 
 ```sh
-apk add ./luci-app-wificalling-gateway_1.4.0-r1_all.apk
+apk add ./luci-app-wificalling-gateway_1.5.0-r1_all.apk
 /etc/init.d/rpcd restart
 ```
 

@@ -1,9 +1,18 @@
 # Changelog
 
+## 1.5.0 - 2026-08-10
+
+- Fixed the local `build-ipk.sh` to produce a standard `ar`-format IPK (Debian binary format 2.0) instead of a gzip tar, which some opkg builds (e.g. iStoreOS) reject with a misleading "No such file or directory" during install.
+- Added an iStoreOS-specific package variant: `scripts/build-ipk.sh <version> istoreos` emits `luci-app-wificalling-gateway_<version>_istoreos_all.ipk` with an unversioned sing-box dependency so iStoreOS feeds with an older sing-box still satisfy it; install docs recommend copying the package to `/tmp` first.
+- Added `scripts/build-apk.sh` to build the OpenWrt 25.12 `.apk` (apk-tools v3 via Docker Alpine) in the same way the Release artifact is produced.
+- Dropped the hard `tcping` dependency (not present in official feeds); node-health probes now use `tcping` only when installed and otherwise fall back to ICMP.
+- Fixed VLESS Reality / VMess TLS generation in `compiler.sh` (TLS block emitted for `security=tls` and Reality, `server_name` omitted when SNI is empty, `alter_id` coerced to a number) and the matching security field in the LuCI node form.
+- Cleared stale `status.json` / `monitor.state` on service start so the Wi-Fi Calling status page no longer shows old data after device edits.
+- Hardened `init.d` (firewall.sh exit-status check with cleanup, delimiter guards on node/device names, vmess auxiliary/flow handling) and made `firewall.sh` exit cleanly when no clients are configured.
+- Removed the unused `monitor_interval` config option.
+
 ## 1.4.0 - 2026-08-08
 
-- Fixed the local `build-ipk.sh` to produce a standard `ar`-format IPK (Debian binary format 2.0) instead of a gzip tar, which some opkg builds (e.g. iStoreOS) reject with a misleading "No such file or directory".
-- Added an iStoreOS-specific package variant: `scripts/build-ipk.sh <version> istoreos` emits `luci-app-wificalling-gateway_<version>_istoreos_all.ipk` with an unversioned sing-box dependency so iStoreOS feeds with an older sing-box still satisfy it.
 - Added a complete Simplified Chinese (zh-cn) LuCI translation catalog compiled into a real `.lmo` language pack and packaged into the IPK, so Chinese renders on the router instead of only in source.
 - Chinese interface now shows unified Chinese descriptions, status, and error messages; protocol names and technical fields (TLS, UDP, UUID, SNI, ALPN, Reality, WebSocket, ePDG, IMS, ASSURED, QUIC, etc.) stay in English.
 - Wrapped `node-import.js` error messages and the status/activity machine values (registered, connecting, sustained traffic, etc.) with `_()` so they translate in the UI instead of leaking raw English strings.

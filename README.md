@@ -56,29 +56,29 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版（当前为 1.4.0），上传到路由器后安装。24.10 用 `.ipk`，25.12 用 `.apk`。
+从 [Releases](../../releases) 下载最新稳定版（当前为 1.5.0），上传到路由器后安装。24.10 用 `.ipk`，25.12 用 `.apk`。
 
 **24.10（opkg）**：
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
-**iStoreOS 24.10.x（opkg）**：使用专用包 `luci-app-wificalling-gateway_1.4.0-1_istoreos_all.ipk`，并先放到 `/tmp` 再安装（避免部分 opkg 对 `./` 相对路径报 "No such file or directory"）：
+**iStoreOS 24.10.x（opkg）**：使用专用包 `luci-app-wificalling-gateway_1.5.0-1_istoreos_all.ipk`，并先放到 `/tmp` 再安装（避免部分 opkg 对 `./` 相对路径报 "No such file or directory"）：
 
 ```sh
 opkg update
 cd /tmp
-opkg install /tmp/luci-app-wificalling-gateway_1.4.0-1_istoreos_all.ipk
+opkg install /tmp/luci-app-wificalling-gateway_1.5.0-1_istoreos_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 **25.12（apk）**：
 
 ```sh
-apk add ./luci-app-wificalling-gateway_1.4.0-r1_all.apk
+apk add ./luci-app-wificalling-gateway_1.5.0-r1_all.apk
 /etc/init.d/rpcd restart
 ```
 
