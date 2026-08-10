@@ -75,7 +75,7 @@ opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
 **25.12 (apk)**:
 
 ```sh
-apk add ./luci-app-wificalling-gateway_1.5.0-r1_all.apk
+apk add ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 
