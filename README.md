@@ -66,13 +66,10 @@ opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
-**iStoreOS 24.10.x（opkg）**：使用专用包 `luci-app-wificalling-gateway_1.5.0-1_istoreos_all.ipk`，并先放到 `/tmp` 再安装（避免部分 opkg 对 `./` 相对路径报 "No such file or directory"）：
+**iStoreOS 24.10.x（opkg）**：与 OpenWrt/ImmortalWrt 使用**同一个 IPK**。部分 opkg 对 `./` 相对路径或上传位置会报误导性的 "No such file or directory"，请确认文件真实上传成功后用绝对路径安装：
 
 ```sh
-opkg update
-cd /tmp
-opkg install /tmp/luci-app-wificalling-gateway_1.5.0-1_istoreos_all.ipk
-/etc/init.d/rpcd restart
+opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
 ```
 
 **25.12（apk）**：

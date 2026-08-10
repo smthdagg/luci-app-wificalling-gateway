@@ -3,7 +3,7 @@
 ## 1.5.0 - 2026-08-10
 
 - Aligned IPK packaging with the official OpenWrt `scripts/ipkg-build` format (gzip tar of `debian-binary`, `data.tar.gz`, `control.tar.gz`); verified compatible with the real opkg in an official OpenWrt 24.10.8 rootfs and by an upgrade install on an ImmortalWrt 24.10.6 router (service running).
-- Added an iStoreOS-specific package variant: `scripts/build-ipk.sh <version> istoreos` emits `luci-app-wificalling-gateway_<version>_istoreos_all.ipk` with an unversioned sing-box dependency so iStoreOS feeds with an older sing-box still satisfy it; install docs recommend copying the package to `/tmp` first (some opkg builds report a misleading "No such file or directory" for `./` relative paths).
+- Unified to a single universal `.ipk` for OpenWrt / ImmortalWrt / iStoreOS (24.10 based): the `sing-box` dependency is left unversioned so feeds shipping an older sing-box (e.g. iStoreOS) still satisfy it. Verified by a forced reinstall on an ImmortalWrt 24.10.6 router (service running) and parsing on iStoreOS / OpenWrt 24.10.8; install docs recommend using an absolute path (some opkg builds report a misleading "No such file or directory" for `./` relative paths).
 - Added `scripts/build-apk.sh` to build the OpenWrt 25.12 `.apk` (apk-tools v3 via Docker Alpine); verified install in an OpenWrt 25.12.3 rootfs.
 - Dropped the hard `tcping` dependency (not present in official feeds); node-health probes now use `tcping` only when installed and otherwise fall back to ICMP.
 - Fixed VLESS Reality / VMess TLS generation in `compiler.sh` (TLS block emitted for `security=tls` and Reality, `server_name` omitted when SNI is empty, `alter_id` coerced to a number) and the matching security field in the LuCI node form.
