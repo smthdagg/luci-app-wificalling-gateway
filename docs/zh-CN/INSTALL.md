@@ -3,7 +3,7 @@
 ## 前提
 
 - OpenWrt 或 ImmortalWrt 使用 firewall4/nftables。
-- 软件源能提供 `sing-box >= 1.13.0`、`tcping`、`ip-full` 和 TPROXY 内核模块。
+- 软件源能提供 `sing-box >= 1.13.0`、`ip-full` 和 TPROXY 内核模块（`tcping` 为可选，未安装时 TCP 型节点探测自动降级为 ICMP）。
 - 设备有足够空间运行 sing-box；建议至少预留 20 MB 闪存和 64 MB 可用内存。
 - 为目标手机设置 DHCP 静态租约。
 

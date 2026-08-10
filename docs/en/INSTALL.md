@@ -1,6 +1,6 @@
 # Installation and upgrade
 
-Requirements: OpenWrt or ImmortalWrt with firewall4/nftables; `sing-box >= 1.13.0`; `tcping`, `ip-full`, and matching TPROXY kernel modules; a static DHCP lease for every selected client. Do not mix kernel packages from different firmware releases.
+Requirements: OpenWrt or ImmortalWrt with firewall4/nftables; `sing-box >= 1.13.0`; `ip-full`, and matching TPROXY kernel modules; `tcping` is optional (TCP-type node probes fall back to ICMP when it is absent); a static DHCP lease for every selected client. Do not mix kernel packages from different firmware releases.
 
 ```sh
 opkg update

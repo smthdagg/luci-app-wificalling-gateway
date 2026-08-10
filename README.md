@@ -52,7 +52,7 @@
 | 网络 | IPv4 LAN 策略；设备必须使用 DHCP 静态租约 |
 | 包架构 | `all`（Shell 与 LuCI 资源）；运行能力取决于目标 sing-box 包 |
 
-依赖：`luci-base`、`sing-box`、`firewall4`、`kmod-nft-tproxy`、`kmod-nft-socket`、`ip-full`、`tcping`。
+依赖：`luci-base`、`sing-box`、`firewall4`、`kmod-nft-tproxy`、`kmod-nft-socket`、`ip-full`。
 
 ## 快速安装
 
@@ -63,6 +63,15 @@
 ```sh
 opkg update
 opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
+/etc/init.d/rpcd restart
+```
+
+**iStoreOS 24.10.x（opkg）**：使用专用包 `luci-app-wificalling-gateway_1.4.0-1_istoreos_all.ipk`，并先放到 `/tmp` 再安装（避免部分 opkg 对 `./` 相对路径报 "No such file or directory"）：
+
+```sh
+opkg update
+cd /tmp
+opkg install /tmp/luci-app-wificalling-gateway_1.4.0-1_istoreos_all.ipk
 /etc/init.d/rpcd restart
 ```
 

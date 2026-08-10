@@ -52,7 +52,7 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 | Network | IPv4 LAN policies; static DHCP leases required |
 | Package arch | `all`; runtime support still depends on the target sing-box package |
 
-Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft-socket`, `ip-full`, and `tcping`.
+Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft-socket`, `ip-full`.
 
 ## Quick install
 
@@ -63,6 +63,15 @@ Download the latest stable release (currently 1.4.0) from [Releases](../../relea
 ```sh
 opkg update
 opkg install ./luci-app-wificalling-gateway_1.4.0-1_all.ipk
+/etc/init.d/rpcd restart
+```
+
+**iStoreOS 24.10.x (opkg)**: use the dedicated package `luci-app-wificalling-gateway_1.4.0-1_istoreos_all.ipk` and place it in `/tmp` first — some opkg builds reject a `./` relative path with a misleading "No such file or directory":
+
+```sh
+opkg update
+cd /tmp
+opkg install /tmp/luci-app-wificalling-gateway_1.4.0-1_istoreos_all.ipk
 /etc/init.d/rpcd restart
 ```
 

@@ -2,6 +2,8 @@
 
 ## 1.4.0 - 2026-08-08
 
+- Fixed the local `build-ipk.sh` to produce a standard `ar`-format IPK (Debian binary format 2.0) instead of a gzip tar, which some opkg builds (e.g. iStoreOS) reject with a misleading "No such file or directory".
+- Added an iStoreOS-specific package variant: `scripts/build-ipk.sh <version> istoreos` emits `luci-app-wificalling-gateway_<version>_istoreos_all.ipk` with an unversioned sing-box dependency so iStoreOS feeds with an older sing-box still satisfy it.
 - Added a complete Simplified Chinese (zh-cn) LuCI translation catalog compiled into a real `.lmo` language pack and packaged into the IPK, so Chinese renders on the router instead of only in source.
 - Chinese interface now shows unified Chinese descriptions, status, and error messages; protocol names and technical fields (TLS, UDP, UUID, SNI, ALPN, Reality, WebSocket, ePDG, IMS, ASSURED, QUIC, etc.) stay in English.
 - Wrapped `node-import.js` error messages and the status/activity machine values (registered, connecting, sustained traffic, etc.) with `_()` so they translate in the UI instead of leaking raw English strings.

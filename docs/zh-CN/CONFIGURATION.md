@@ -6,7 +6,7 @@
 
 先点“添加代理节点”，填写显示名称、协议、服务器和协议必需字段。AnyTLS/Hysteria2 使用密码；TUIC 使用 UUID 和密码；VLESS Reality 使用 UUID、flow、SNI、公钥、short ID 和指纹；VMess WS 使用 UUID、Host 和路径。TLS 公钥指纹必须是 Base64 SHA-256，而不是十六进制文本。
 
-Proxy nodes 列表直接显示节点存活状态、Ping/延迟和质量等级。优先检测 ICMP，TCP 型协议失败时会用 `tcping` 探测端口。它不执行完整代理握手。UDP 型节点显示未知不能直接判定离线。
+Proxy nodes 列表直接显示节点存活状态、Ping/延迟和质量等级。优先检测 ICMP，TCP 型协议失败时会用 `tcping`（已安装时）探测端口。它不执行完整代理握手。UDP 型节点显示未知不能直接判定离线。
 
 ## 设备策略
 
