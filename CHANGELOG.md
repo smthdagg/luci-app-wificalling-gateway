@@ -8,7 +8,7 @@
 - Added `scripts/build-apk.sh` to build the OpenWrt 25.12 `.apk` (apk-tools v3 via Docker Alpine, `ARCH` overridable, defaults to `noarch`).
 - Dropped the hard `tcping` dependency (not present in official feeds); node-health probes now use `tcping` only when installed and otherwise fall back to ICMP.
 - Fixed VLESS Reality / VMess TLS generation in `compiler.sh` (TLS block emitted for `security=tls` and Reality, `server_name` omitted when SNI is empty, `alter_id` coerced to a number) and the matching security field in the LuCI node form.
-- Cleared stale `status.json` / `monitor.state` on service start so the Wi-Fi Calling status page no longer shows old data after device edits.
+- Cleared stale `status.json` on service start and stop so the Wi-Fi Calling status page no longer shows old data after device edits or when the gateway is disabled; `monitor.state` is deliberately kept as the monitor's per-device baseline to avoid fabricated handshake events on restart.
 - Hardened `init.d` (firewall.sh exit-status check with cleanup, delimiter guards on node/device names, vmess auxiliary/flow handling) and made `firewall.sh` exit cleanly when no clients are configured.
 - Removed the unused `monitor_interval` config option.
 
