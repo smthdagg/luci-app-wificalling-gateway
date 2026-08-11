@@ -28,8 +28,8 @@
 
 ## 功能
 
-- 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket。
-- 支持直接粘贴 AnyTLS、Hysteria2/Hy2、TUIC、VLESS、VMess 分享链接并自动解析导入。
+- 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket、Trojan 与 WireGuard。
+- 支持直接粘贴 AnyTLS、Hysteria2/Hy2、TUIC、VLESS、VMess、Trojan (trojan://) 与 WireGuard (wg://) 分享链接并自动解析导入。
 - 每台设备可绑定一个节点；一个策略可包含多个固定私网 IPv4 地址。
 - `独立通道`：通过插件节点转发；`跟随网关`：插件不拦截，设备走路由器默认路由。
 - 单个 sing-box 进程、nftables TPROXY、TCP 与 UDP 透明转发。
@@ -51,7 +51,7 @@
 | 已实机验证 | ImmortalWrt 24.10.6，Redmi AX6S，aarch64_cortex-a53（真实路由器） |
 | iStoreOS 实测 | **24.10.7 完整固件（QEMU 全系统模拟，与用户报错同版本）**：安装 + 服务 active + LuCI 设置/状态/活动日志页面全中文实测通过 |
 | 容器/模拟验证 | OpenWrt 24.10.8 / 25.12.3 官方 rootfs；iStoreOS 24.10.5（Docker）、24.10.7（QEMU 完整固件） |
-| sing-box | 建议 1.13.0 或更高；IPK 不锁版本（兼容各源较旧版本），25.12 官方源自带（armv7/mipsel 实测自动装 1.12.17） |
+| sing-box | 建议 1.13.0 或更高；IPK 不锁版本（兼容各源较旧版本），25.12 官方源自带（armv7/mipsel 实测自动装 1.12.17）。WireGuard 节点自动适配：sing-box ≥1.11 用 endpoint 形式，1.10.x 及更早用旧版 outbound（均经 1.10.0/1.11.7/1.12.0/1.13.18 实测） |
 | LuCI | JavaScript 视图（现代 LuCI） |
 | 网络 | IPv4 LAN 策略；设备必须使用 DHCP 静态租约 |
 | 包架构 | IPK `all`（Shell 与 LuCI 资源）；APK `noarch`（25.12 apk 不接受 `all`，官方包按目标架构分发） |
@@ -60,26 +60,26 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版（当前为 1.5.0），上传到路由器后安装。**24.10 全系用一个 `.ipk`，25.12 全系用一个 `.apk`（noarch，不分芯片）**。
+从 [Releases](../../releases) 下载最新稳定版（当前为 1.6.0），上传到路由器后安装。**24.10 全系用一个 `.ipk`，25.12 全系用一个 `.apk`（noarch，不分芯片）**。
 
 **OpenWrt / ImmortalWrt / iStoreOS 24.10.x（opkg / IPK）** —— 一个包通用，已实机验证：
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.6.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 > iStoreOS 提示：部分 opkg 对 `./` 相对路径或上传位置会报误导性的 "No such file or directory"。请确认文件**真实上传成功**后再用绝对路径安装：
 >
 > ```sh
-> opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
+> opkg install /root/luci-app-wificalling-gateway_1.6.0-1_all.ipk
 > ```
 >
 > 若 iStoreOS 的定制 opkg 对本地文件报 `incompatible with the architectures configured`（已实测），可改用**解包安装**（24.10.7 完整固件实测通过）：
 >
 > ```sh
-> cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.tar.gz -C /
+> cd /tmp && tar xzf luci-app-wificalling-gateway_1.6.0-1_all.ipk && tar xzf data.tar.gz -C /
 > /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 > ```
 
@@ -87,7 +87,7 @@ opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.6.0-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 

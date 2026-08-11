@@ -28,8 +28,8 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 
 ## Features
 
-- AnyTLS, Hysteria2, TUIC, VLESS Reality and VMess WebSocket outbounds.
-- Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, and VMess share links with local browser-side parsing.
+- AnyTLS, Hysteria2, TUIC, VLESS Reality, VMess WebSocket, Trojan and WireGuard outbounds.
+- Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, VMess, Trojan (trojan://) and WireGuard (wg://) share links with local browser-side parsing.
 - One selected node per device policy; multiple fixed private IPv4 addresses per policy.
 - **Independent tunnel** routes through the plugin node; **Follow gateway** is not intercepted and uses the router default routing.
 - One sing-box process, nftables TPROXY, transparent TCP and UDP routing.
@@ -51,7 +51,7 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 | Hardware tested | ImmortalWrt 24.10.6, Redmi AX6S, aarch64_cortex-a53 (real router) |
 | iStoreOS verified | **24.10.7 full firmware (QEMU full-system emulation, same version as the reported issue)**: install + service active + LuCI Settings/Status/Activity Log pages verified in Simplified Chinese |
 | Container/emulation tested | Official OpenWrt 24.10.8 / 25.12.3 rootfs; iStoreOS 24.10.5 (Docker), 24.10.7 (full QEMU firmware) |
-| sing-box | 1.13.0 or newer recommended; the IPK leaves it unversioned (compatible with older sing-box in some feeds); the 25.12 official feed ships sing-box (1.12.17 auto-installed on armv7/mipsel in tests) |
+| sing-box | 1.13.0 or newer recommended; the IPK leaves it unversioned (compatible with older sing-box in some feeds); the 25.12 official feed ships sing-box (1.12.17 auto-installed on armv7/mipsel in tests). WireGuard nodes adapt automatically: endpoint form on sing-box ≥ 1.11, legacy outbound on 1.10.x and older (verified against real 1.10.0 / 1.11.7 / 1.12.0 / 1.13.18 binaries) |
 | LuCI | Modern JavaScript views |
 | Network | IPv4 LAN policies; static DHCP leases required |
 | Package arch | IPK `all`; APK `noarch` (the 25.12 apk rejects `arch: all`; official 25.12 packages are built per target) |
@@ -60,26 +60,26 @@ Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft
 
 ## Quick install
 
-Download the latest stable release (currently 1.5.0) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
+Download the latest stable release (currently 1.6.0) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
 
 **OpenWrt / ImmortalWrt / iStoreOS 24.10.x (opkg / IPK)** — one shared package, verified on real hardware:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.5.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.6.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 **iStoreOS note**: some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations — make sure the file was actually uploaded, then install by absolute path:
 
 ```sh
-opkg install /root/luci-app-wificalling-gateway_1.5.0-1_all.ipk
+opkg install /root/luci-app-wificalling-gateway_1.6.0-1_all.ipk
 ```
 
 If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (verified), install by extracting instead (verified on 24.10.7 full firmware):
 
 ```sh
-cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.tar.gz -C /
+cd /tmp && tar xzf luci-app-wificalling-gateway_1.6.0-1_all.ipk && tar xzf data.tar.gz -C /
 /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 ```
 
@@ -87,7 +87,7 @@ cd /tmp && tar xzf luci-app-wificalling-gateway_1.5.0-1_all.ipk && tar xzf data.
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.5.0-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.6.0-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 

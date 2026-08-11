@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.0 - 2026-08-11
+
+- Added **Trojan** and **WireGuard** proxy node protocols: Trojan emits a sing-box `trojan` outbound (`password` + TLS with SNI/ALPN/insecure/pin); WireGuard works with every sing-box generation — `init.d` detects the installed version and emits the **wireguard endpoint** form (route rules target the endpoint tag) for sing-box ≥ 1.11, or the legacy wireguard **outbound** for 1.10.x and older. The legacy outbound was deprecated in 1.11.0 (gated behind `ENABLE_DEPRECATED_WIREGUARD_OUTBOUND`) and removed in 1.13.0, so this was verified with `sing-box check` against 1.10.0 / 1.11.7 / 1.12.0 / 1.13.18 real binaries.
+- Share-link import now accepts `trojan://` and `wg://` (WireGuard, Clash Meta / sing-box style: `wg://<peer-public-key>@<server>:<port>?private_key=…&local_address=…&reserved=…&mtu=…`); imported nodes map into UCI and never leave the browser.
+- Node health probe falls back to `tcping` for Trojan (TCP-based) when ICMP is blocked; WireGuard stays ICMP-only (UDP).
+- LuCI node form gained the WireGuard fields (private key, local address, reserved, MTU); protocol list and import panel text updated, with new Simplified Chinese translations.
+- Version bumped to 1.6.0; docs updated (README, README_EN, CONFIGURATION zh/en).
+
 ## 1.5.0 - 2026-08-10
 
 - Aligned IPK packaging with the official OpenWrt `scripts/ipkg-build` format (gzip tar of `debian-binary`, `data.tar.gz`, `control.tar.gz`); verified compatible with the real opkg in an official OpenWrt 24.10.8 rootfs and by an upgrade install on an ImmortalWrt 24.10.6 router (service running).
