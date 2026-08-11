@@ -66,26 +66,32 @@ git diff --check    # whitespace; also run the PackageTests suite
 
 ## Upstream PR workflow (important)
 
-Two parallel PRs exist, from **two different forks**:
+**Only one upstream channel is correct: `openwrt/luci#8921`** (fork `smthdagg/luci-1`, branch `luci-app-wificalling-gateway`). The package lives under `applications/luci-app-wificalling-gateway/` (19 files, no README_EN/SECURITY/docs - only what the feed wants).
 
-| Target | Fork | PR |
-|---|---|---|
-| `immortalwrt/luci` | `smthdagg/luci` | #694 |
-| `openwrt/luci` | `smthdagg/luci-1` | #8921 |
+> **Do not open an independent PR against `immortalwrt/luci`.** ImmortalWrt's luci repo is a mirror of OpenWrt's; its `CONTRIBUTING.md` explicitly says "open a pull request against the openwrt/luci repository". ImmortalWrt only accepts its own apps that are not in OpenWrt upstream (e.g. `luci-app-passwall`). A normal luci app PR was opened there once (#694) and was **closed without comment by the maintainer (Tianling Shen)** because it should go through OpenWrt upstream. After `openwrt/luci#8921` is merged, ImmortalWrt picks the app up via its regular upstream sync - no separate action needed. (The old `smthdagg/luci` fork #694 can be left closed.)
 
-- Both use branch `luci-app-wificalling-gateway`; the package lives under `applications/luci-app-wificalling-gateway/` (19 files, no README_EN/SECURITY/docs — only what the feed wants).
 - **Reviewer is an automated AI bot (`openwrt-ai`) plus FormalityCheck CI.** Rules that have bitten us:
-  - Commit subject ≤ 80 chars, `luci-app-wificalling-gateway: ` prefix, `Signed-off-by:` line, author/committer = real full name (`Smth Dagg <smthdagg@gmail.com>` — the local git identity is `Ethan.Y`, always override with `-c user.name=... -c user.email=...`).
+  - Commit subject ≤ 80 chars, `luci-app-wificalling-gateway: ` prefix, `Signed-off-by:` line, author/committer = real full name (`Smth Dagg <smthdagg@gmail.com>` - the local git identity is `Ethan.Y`, always override with `-c user.name=... -c user.email=...`).
   - `git diff --check` clean; Makefile SPDX header stays; tabs not spaces in shell.
-  - When updating the PRs: copy changed files from the release repo into both fork checkouts, run the full local verification, commit with the proper identity, push, then wait for FormalityCheck (three jobs) to pass. Force-push only when amending your own unpushed commit.
-- The immortalwrt PR's `Test Formalities` failure is an upstream workflow issue (`pull_request_target` + checkout without `allow-unsafe-pr-checkout`), affecting all fork PRs — not a submission defect; it is documented in the PR thread.
+  - When updating the PR: copy changed files from the release repo into the fork checkout, run the full local verification, commit with the proper identity, push, then wait for FormalityCheck (three jobs) to pass. Force-push only when amending your own unpushed commit.
+  - `gh pr edit` is broken by the Projects-classic GraphQL deprecation; update the PR body via `gh api repos/openwrt/luci/pulls/8921 -X PATCH --input <json>` instead.
+
+## Pre-submission checklist (run before every push)
+
+- [ ] **Verify the target repo's contribution rules first** (read its CONTRIBUTING / README) - do not assume the submission channel from memory. This was not done for ImmortalWrt and the PR was closed.
+- [ ] `python3 -m unittest discover -s tests` green; `sh -n` / `node --check` / `git diff --check` clean.
+- [ ] Version bumped in `Makefile` + `scripts/build-ipk.sh` + `scripts/build-apk.sh` + README install commands + `tests/test_gateway.py` (`test_release_metadata_and_runtime_dependencies`).
+- [ ] `.pot` and `.po` in sync, ASCII-sorted, compile with `po2lmo.py`.
+- [ ] Commit author/committer = `Smth Dagg <smthdagg@gmail.com>` (override local `Ethan.Y`), `Signed-off-by:` present, subject ≤ 80 chars with `luci-app-wificalling-gateway:` prefix.
+- [ ] On the router: install the built IPK, restart rpcd + service, confirm `running`, `clients`, nft `clients4`, `wfc_` DHCP hosts, and the LuCI pages render.
 
 ## Known pitfalls (field-learned, keep these in mind)
 
+0. **Assume vs verify** - the meta-pitfall. Several regressions in this project came from confidently asserting something that was never checked: "two parallel PRs, either merges" (ImmortalWrt's CONTRIBUTING says otherwise), "Test Formalities failure is just an upstream workflow issue" (the PR was actually closed for being on the wrong repo), "label with `|` is fine" (the delimiter guard rejected 4 subscription nodes silently), "Hysteria2 node is alive" (ICMP reachable but proxy path dead -> device lost internet), "Map.save() persists" (it never commits the session changeset). **Before stating a fact that gates work, verify it against the source** (repo rules, real binaries, actual uci state). If unsure, say so and check first.
 1. **LuCI 24.10 "Save" button**: `Map.save()` alone never commits the session-scoped UCI changeset (only `apply` does), and the default footer Save handler resolves the Map via a DOM instance lookup that silently fails on this firmware. `overview.js` binds the footer Save button directly to `m.save().then(() => ui.changes.apply(true))`. Do not "simplify" this back to a plain `map.save()`.
 2. **DummyValue in grid edit modals** renders its (always null) `cfgvalue`; the DHCP binding column overrides `renderWidget` and sets `rmempty = true` (without it the save parse rejects "must not be empty"). Grid rows use `textvalue`.
 3. **Delimiter guard vs labels**: `normalized.conf` is pipe-delimited; the guard covers every field that enters it. `label` must be **excluded** (subscription labels routinely contain `|`, e.g. `HK01|BGP|CMCU`) and sanitized in the `nodes`/`clients` files (`tr '|' ' '`).
-4. **Lease file format**: dnsmasq `/tmp/dhcp.leases` lines are `expiry MAC IP hostname clientid` — IP is field 3, MAC is field 2 (both `dhcp-sync.sh` and `overview.js` parse this).
+4. **Lease file format**: dnsmasq `/tmp/dhcp.leases` lines are `expiry MAC IP hostname clientid` - IP is field 3, MAC is field 2 (both `dhcp-sync.sh` and `overview.js` parse this). The lease file path is a UCI option (`dhcp.@dnsmasq[0].leasefile`), not always `/tmp/dhcp.leases`.
 5. **Exit nodes**: only TCP-based protocols (anytls/vless/vmess/trojan) are reliable gateway exits. Hysteria2/TUIC "alive" only proves ICMP; a dead UDP proxy path left a routed device with no internet. WireGuard needs sing-box ≥ 1.11 (endpoint form; legacy outbound removed in 1.13).
 6. **iOS private Wi-Fi MACs rotate** — this silently breaks manual DHCP bindings; `dhcp-sync.sh` heals them at service start, and the device just needs to reconnect Wi-Fi.
 7. **i18n discipline**: every new UI string must appear in both `po/templates/*.pot` and `po/zh_Hans/*.po` (msgid must match exactly; keep alphabetical order); the zh catalog must compile with `po2lmo.py`.
