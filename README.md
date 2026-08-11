@@ -49,6 +49,28 @@
 > - **UDP/QUIC 系（Hysteria2、TUIC）实测不适合**：节点的"在线"状态仅代表 ICMP 可达（不是代理握手成功），UDP-in-UDP 在公网抖动下会导致拨号立即中断；曾实测因 Hysteria2 节点代理链路不通导致被路由设备**无互联网**。
 > - WireGuard 为 UDP 协议但自带保活与重传机制，可作为出口（插件自动适配 sing-box ≥1.11 的 endpoint 形式）。
 
+## 为什么要绑定 DHCP 静态 IP
+
+本插件的防火墙规则**按 IP 识别设备**：设备策略里填写的 `source_ip` 会被写入 nftables 的 `clients4` 集合，凡是匹配该 IP 的流量才会被 TPROXY 转发到 sing-box 节点。**如果设备实际拿到的 IP 与策略不一致，规则就匹配不到，设备流量不会经过网关**——这曾经是"配置了但没生效"的最常见原因。
+
+因此设备 IP 必须固定，固定方式就是 DHCP 静态租约（把设备的 MAC 与策略 IP 绑定）。从 1.7.0 起插件在服务启动时自动从当前租约同步这份绑定：
+
+- 添加设备策略 → 自动为策略 IP 绑定当前使用该 IP 的设备的 MAC；
+- 删除设备策略 → 自动清理对应绑定；
+- iOS 的"私有无线局域网地址"导致 MAC 变化时，设备重连 Wi-Fi（或重启）后插件自动按新 MAC 重新绑定，无需手工改配置。
+
+设备策略表里的「DHCP 绑定」列实时显示状态：`已绑定` / `待绑定`（设备在线但尚未绑定）/ `MAC 已变化，重连后自动重绑` / `设备未在线`。
+
+## 监控能力边界（重要）
+
+Wi‑Fi Calling 的 ePDG/IPsec 隧道（UDP 4500 内）**全程加密**，路由器只能观察到外层隧道的包量，看不到隧道内的 SIP 信令、语音或短信内容。因此：
+
+- **通话可以推断**：注册后出现持续双向加密流量（响铃或通话的 RTP 特征，持续数秒以上）→ 活动日志标记为「**通话进行中（根据持续加密流量推断）**」；
+- **短信无法可靠区分**：短信（IMS 短信）是短突发流量，与 keepalive、系统推送等无法区分，因此**不记录**，也不会误报为短信；
+- **电话号码、消息内容、呼叫方向永远不可见**。
+
+活动日志记录的是：握手成功 / 握手失败 / 持续通讯（推断为通话）。这是路由器侧的网络证据，不是运营商侧的确认。
+
 ## 设备使用提示
 
 - iOS 默认启用"私有无线局域网地址"，MAC 会随机变化，导致手工 DHCP 绑定失效。本插件（≥1.7.0）在服务启动时自动从当前租约重新绑定设备 MAC，**设备重连 Wi-Fi（或重启）即可自动恢复**，无需手工改配置。
@@ -74,26 +96,26 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版（当前为 1.7.0），上传到路由器后安装。**24.10 全系用一个 `.ipk`，25.12 全系用一个 `.apk`（noarch，不分芯片）**。
+从 [Releases](../../releases) 下载最新稳定版（当前为 1.7.1），上传到路由器后安装。**24.10 全系用一个 `.ipk`，25.12 全系用一个 `.apk`（noarch，不分芯片）**。
 
 **OpenWrt / ImmortalWrt / iStoreOS 24.10.x（opkg / IPK）** —— 一个包通用，已实机验证：
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.7.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.7.1-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 > iStoreOS 提示：部分 opkg 对 `./` 相对路径或上传位置会报误导性的 "No such file or directory"。请确认文件**真实上传成功**后再用绝对路径安装：
 >
 > ```sh
-> opkg install /root/luci-app-wificalling-gateway_1.7.0-1_all.ipk
+> opkg install /root/luci-app-wificalling-gateway_1.7.1-1_all.ipk
 > ```
 >
 > 若 iStoreOS 的定制 opkg 对本地文件报 `incompatible with the architectures configured`（已实测），可改用**解包安装**（24.10.7 完整固件实测通过）：
 >
 > ```sh
-> cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.0-1_all.ipk && tar xzf data.tar.gz -C /
+> cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.1-1_all.ipk && tar xzf data.tar.gz -C /
 > /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 > ```
 
@@ -101,7 +123,7 @@ opkg install ./luci-app-wificalling-gateway_1.7.0-1_all.ipk
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.0-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.1-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 

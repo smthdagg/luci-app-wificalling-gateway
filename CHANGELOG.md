@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.1 - 2026-08-11
+
+- Activity log now marks sustained encrypted communication as **"Call in progress (inferred from sustained encrypted traffic)"** (`likely_call`): sustained bidirectional traffic after registration is the RTP signature of ringing/an in-call voice stream. The IPsec tunnel stays fully encrypted, so SMS cannot be reliably distinguished (short bursts look like keepalives/pushes) and is not logged; numbers, content and call direction remain invisible. Docs (README / CONFIGURATION, zh + en) now explain the DHCP static-binding rationale and the monitoring capability boundary.
+- Review fixes (openwrt-ai): `dhcp-sync.sh` scrubs dnsmasq `dhcp-host` names (spaces/commas/quotes/semicolons would make dnsmasq reject the host line, breaking LAN DNS/DHCP) and reads the lease file from `dhcp.@dnsmasq[0].leasefile`; `compiler.sh` fails early with node-specific messages for missing wireguard keys/address or non-numeric `reserved`/`mtu`; `wg://` import restores `+` in base64 keys; `local` declarations in init.d; `.pot`/`.po` re-sorted to ASCII order. 49/49 tests pass.
+
 ## 1.7.0 - 2026-08-11
 
 - **DHCP static leases are now auto-managed from device policies**: the nftables policy rules match a fixed client IPv4, but hand-made DHCP bindings silently broke when a device's MAC changed (iOS rotates its private Wi-Fi address) or when a policy was edited. A new `dhcp-sync.sh` runs on every service start: it creates/updates `wfc_`-prefixed DHCP host bindings from the live lease table (so a policy IP in use by a device always pins the device's current MAC), drops bindings whose policy was removed, and only touches plugin-created hosts (user-managed ones are left alone). `dnsmasq` is restarted only when something changed.

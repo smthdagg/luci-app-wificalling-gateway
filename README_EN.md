@@ -49,6 +49,28 @@ The screenshot proves the handset reached the Wi-Fi Calling registration state; 
 > - **UDP/QUIC-based protocols (Hysteria2, TUIC) are not suitable in practice**: a node's "alive" state only proves ICMP reachability (not a proxy handshake), and UDP-in-UDP breaks calls immediately under jitter; a Hysteria2 node with a dead proxy path once left the routed device with **no internet**.
 > - WireGuard is UDP but has built-in keepalive/retransmission and works as an exit (the plugin auto-adapts to the sing-box ≥ 1.11 endpoint form).
 
+## Why DHCP static binding is required
+
+The firewall rules identify devices **by IP address**: the `source_ip` entered in a device policy is written into the nftables `clients4` set, and only traffic matching that IP is TPROXY-forwarded to the sing-box node. **If the device's actual IP differs from the policy, the rules never match and the device traffic bypasses the gateway** — historically the most common "configured but not working" cause.
+
+So the device IP must be fixed, which is what a DHCP static lease (binding the device MAC to the policy IP) provides. Since 1.7.0 the plugin reconciles this binding automatically from the live lease table on every service start:
+
+- Adding a device policy → the policy IP gets bound to the MAC of whichever device currently leases it;
+- Removing a policy → its binding is cleaned up;
+- When iOS rotates its private Wi-Fi MAC, reconnecting Wi-Fi (or rebooting) lets the plugin re-bind the new MAC automatically — no manual config.
+
+The device policy table's **DHCP binding** column shows the live state: `Bound` / `Not bound yet` / `MAC changed, rebind on reconnect` / `Device offline`.
+
+## Monitoring capability boundary (important)
+
+The ePDG/IPsec tunnel (inside UDP 4500) is **fully encrypted**; the router only sees outer-tunnel packet counts, never the SIP signalling, voice or SMS payload inside. Therefore:
+
+- **Calls can be inferred**: sustained bidirectional encrypted traffic after registration (the RTP signature of ringing or an in-call voice stream, lasting a few seconds) is logged as **"Call in progress (inferred from sustained encrypted traffic)"**;
+- **SMS cannot be reliably distinguished**: SMS over IMS is a short burst indistinguishable from keepalives/system pushes, so it is **not logged** and never misreported as SMS;
+- **Phone numbers, message content and call direction are never visible**.
+
+The activity log records: handshake success / handshake failure / sustained communication (inferred as a call). This is router-side network evidence, not carrier-side confirmation.
+
 ## Device tips
 
 - iOS enables "Private Wi-Fi Address" by default, which rotates the MAC and silently breaks hand-made DHCP bindings. Since 1.7.0 the plugin re-binds the device's current MAC from the live lease table on every service start — **reconnecting Wi-Fi (or rebooting the device) restores the binding automatically**, no manual config needed.
@@ -74,26 +96,26 @@ Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft
 
 ## Quick install
 
-Download the latest stable release (currently 1.7.0) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
+Download the latest stable release (currently 1.7.1) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
 
 **OpenWrt / ImmortalWrt / iStoreOS 24.10.x (opkg / IPK)** — one package for all, verified on real hardware:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.7.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.7.1-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 > iStoreOS note: some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations. Verify the file was **actually uploaded** and use an absolute path:
 >
 > ```sh
-> opkg install /root/luci-app-wificalling-gateway_1.7.0-1_all.ipk
+> opkg install /root/luci-app-wificalling-gateway_1.7.1-1_all.ipk
 > ```
 >
 > If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (verified), use the extract install (verified on the 24.10.7 full firmware):
 >
 > ```sh
-> cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.0-1_all.ipk && tar xzf data.tar.gz -C /
+> cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.1-1_all.ipk && tar xzf data.tar.gz -C /
 > /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 > ```
 
@@ -101,7 +123,7 @@ opkg install ./luci-app-wificalling-gateway_1.7.0-1_all.ipk
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.0-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.1-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 
