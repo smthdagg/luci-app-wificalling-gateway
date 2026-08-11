@@ -1,6 +1,6 @@
 # Wi-Fi Calling Gateway
 
-[English](README_EN.md) · [安装](docs/zh-CN/INSTALL.md) · [配置](docs/zh-CN/CONFIGURATION.md) · [编译](docs/zh-CN/BUILD.md) · [排错](docs/zh-CN/TROUBLESHOOTING.md)
+[English](README_EN.md) · [安装](docs/zh-CN/INSTALL.md) · [配置](docs/zh-CN/CONFIGURATION.md) · [排错](docs/zh-CN/TROUBLESHOOTING.md) · [开发与维护](DEVELOPER.md)
 
 面向 OpenWrt / ImmortalWrt 的独立 LuCI 插件。它把指定局域网设备通过指定的 sing-box 节点转发，同时让其他设备继续走路由器默认路由，并观察 Wi‑Fi Calling 常用的 ePDG/IPsec UDP 500、4500 会话证据。
 
@@ -28,17 +28,31 @@
 
 ## 功能
 
-- 支持 AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket、Trojan 与 WireGuard。
+- 支持 **AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket、Trojan 与 WireGuard** 七种节点协议。
 - 支持直接粘贴 AnyTLS、Hysteria2/Hy2、TUIC、VLESS、VMess、Trojan (trojan://) 与 WireGuard (wg://) 分享链接并自动解析导入。
+- **DHCP 静态租约自动管理**：添加/删除设备策略时自动绑定/清理 MAC-IP 静态租约，兼容 iOS 私有 Wi-Fi 地址（MAC 随机变化）；设备策略表实时显示绑定状态（已绑定 / 待绑定 / MAC 已变化 / 设备未在线）。
 - 每台设备可绑定一个节点；一个策略可包含多个固定私网 IPv4 地址。
 - `独立通道`：通过插件节点转发；`跟随网关`：插件不拦截，设备走路由器默认路由。
 - 单个 sing-box 进程、nftables TPROXY、TCP 与 UDP 透明转发。
-- 节点 ICMP/TCP 可达性与延迟检测。
+- 节点 ICMP/TCP 可达性与延迟检测（TCP 系协议在 ICMP 被阻断时自动回退 tcping）。
 - 内置简体中文界面（语言包随安装包提供）；中文说明与状态，协议名与技术字段（TLS、UDP、UUID、SNI、ALPN、Reality、WebSocket 等）保留英文。
 - 设置、Wi‑Fi Calling 状态、加密 IMS 活动日志分为三个独立管理页面。
 - 观察 UDP 500/4500，显示注册状态、ePDG、ASSURED、包计数及最后活动时间。
 - 只记录握手成功/失败与持续加密通讯（响铃或通话，持续数秒以上）；每台设备默认独立保留最近 20 条，可在设置中调整或关闭活动日志。
 - 启动前执行 `sing-box check`；配置和运行时凭据权限设为 `0600`。
+
+## 节点协议选择（重要）
+
+> **⚠️ 网关出口节点请使用 TCP 系协议（AnyTLS / VLESS / VMess / Trojan）。**
+>
+> - TCP 系在公网丢包/抖动下提供可靠有序的传输，IPsec keepalive 与 RTP 语音不丢，适合作为 Wi‑Fi Calling 出口。
+> - **UDP/QUIC 系（Hysteria2、TUIC）实测不适合**：节点的"在线"状态仅代表 ICMP 可达（不是代理握手成功），UDP-in-UDP 在公网抖动下会导致拨号立即中断；曾实测因 Hysteria2 节点代理链路不通导致被路由设备**无互联网**。
+> - WireGuard 为 UDP 协议但自带保活与重传机制，可作为出口（插件自动适配 sing-box ≥1.11 的 endpoint 形式）。
+
+## 设备使用提示
+
+- iOS 默认启用"私有无线局域网地址"，MAC 会随机变化，导致手工 DHCP 绑定失效。本插件（≥1.7.0）在服务启动时自动从当前租约重新绑定设备 MAC，**设备重连 Wi-Fi（或重启）即可自动恢复**，无需手工改配置。
+- 添加设备策略后，若设备 IP 与策略不符，重启设备网络（关 Wi-Fi 再开）让其重新获取 DHCP 地址。
 
 ## 支持环境
 
@@ -60,26 +74,26 @@
 
 ## 快速安装
 
-从 [Releases](../../releases) 下载最新稳定版（当前为 1.6.0），上传到路由器后安装。**24.10 全系用一个 `.ipk`，25.12 全系用一个 `.apk`（noarch，不分芯片）**。
+从 [Releases](../../releases) 下载最新稳定版（当前为 1.7.0），上传到路由器后安装。**24.10 全系用一个 `.ipk`，25.12 全系用一个 `.apk`（noarch，不分芯片）**。
 
 **OpenWrt / ImmortalWrt / iStoreOS 24.10.x（opkg / IPK）** —— 一个包通用，已实机验证：
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.6.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.7.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 > iStoreOS 提示：部分 opkg 对 `./` 相对路径或上传位置会报误导性的 "No such file or directory"。请确认文件**真实上传成功**后再用绝对路径安装：
 >
 > ```sh
-> opkg install /root/luci-app-wificalling-gateway_1.6.0-1_all.ipk
+> opkg install /root/luci-app-wificalling-gateway_1.7.0-1_all.ipk
 > ```
 >
 > 若 iStoreOS 的定制 opkg 对本地文件报 `incompatible with the architectures configured`（已实测），可改用**解包安装**（24.10.7 完整固件实测通过）：
 >
 > ```sh
-> cd /tmp && tar xzf luci-app-wificalling-gateway_1.6.0-1_all.ipk && tar xzf data.tar.gz -C /
+> cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.0-1_all.ipk && tar xzf data.tar.gz -C /
 > /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 > ```
 
@@ -87,7 +101,7 @@ opkg install ./luci-app-wificalling-gateway_1.6.0-1_all.ipk
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.6.0-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.0-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 
@@ -108,6 +122,7 @@ apk add --allow-untrusted ./luci-app-wificalling-gateway_1.6.0-r1_noarch.apk
 - [安装与升级](docs/zh-CN/INSTALL.md)
 - [节点和设备配置](docs/zh-CN/CONFIGURATION.md)
 - [常见问题与排错](docs/zh-CN/TROUBLESHOOTING.md)
+- [开发与维护（面向贡献者 / 自动化接管）](DEVELOPER.md)
 - [安全策略](SECURITY.md) · [更新记录](CHANGELOG.md)
 
 ## 许可证

@@ -1,6 +1,6 @@
 # Wi-Fi Calling Gateway
 
-[中文](README.md) · [Install](docs/en/INSTALL.md) · [Configure](docs/en/CONFIGURATION.md) · [Build](docs/en/BUILD.md) · [Troubleshoot](docs/en/TROUBLESHOOTING.md)
+[中文](README.md) · [Install](docs/en/INSTALL.md) · [Configure](docs/en/CONFIGURATION.md) · [Troubleshoot](docs/en/TROUBLESHOOTING.md) · [Development](DEVELOPER.md)
 
 A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes selected LAN clients through selected sing-box outbounds while leaving other clients on the normal gateway routing. It also reports observable ePDG/IPsec UDP 500/4500 evidence commonly associated with Wi-Fi Calling.
 
@@ -16,99 +16,114 @@ A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes s
 
 ![Encrypted IMS activity log page](docs/images/activity-log.png)
 
-### Observed on a real iPhone
+### Real-device observation
 
-The following screenshot shows **EE WiFiCall** displayed on an actual iPhone while it is using Wi-Fi in airplane mode:
+An actual iPhone showing **EE WiFiCall** in Airplane Mode over Wi-Fi:
 
 <p align="center">
-  <img src="docs/images/iphone-ee-wificall.jpg" alt="EE WiFiCall displayed on a real iPhone" width="420">
+  <img src="docs/images/iphone-ee-wificall.jpg" alt="iPhone showing EE WiFiCall" width="420">
 </p>
 
-This demonstrates the Wi-Fi Calling registration indicator on the device. Carrier activation and calling capability must still be confirmed by a completed call or by the carrier.
+The screenshot proves the handset reached the Wi-Fi Calling registration state; number activation and calling capability must still be confirmed with a real call or by the carrier.
 
 ## Features
 
-- AnyTLS, Hysteria2, TUIC, VLESS Reality, VMess WebSocket, Trojan and WireGuard outbounds.
-- Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, VMess, Trojan (trojan://) and WireGuard (wg://) share links with local browser-side parsing.
+- **Seven node protocols**: AnyTLS, Hysteria2, TUIC, VLESS Reality, VMess WebSocket, Trojan and WireGuard.
+- Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, VMess, Trojan (`trojan://`) and WireGuard (`wg://`) share links with local browser-side parsing.
+- **Automatic DHCP static lease management**: adding/removing a device policy auto-binds/cleans the MAC-IP static lease, tolerating iOS rotating private Wi-Fi addresses (random MACs); the device policy table shows the live binding state (Bound / Not bound yet / MAC changed / Device offline).
 - One selected node per device policy; multiple fixed private IPv4 addresses per policy.
 - **Independent tunnel** routes through the plugin node; **Follow gateway** is not intercepted and uses the router default routing.
 - One sing-box process, nftables TPROXY, transparent TCP and UDP routing.
-- ICMP/TCP reachability and latency observations.
+- Node ICMP/TCP reachability and latency checks (TCP-based protocols fall back to `tcping` when ICMP is blocked).
 - Built-in Simplified Chinese interface (language pack shipped inside the IPK); Chinese descriptions and status, with protocol names and technical fields (TLS, UDP, UUID, SNI, ALPN, Reality, WebSocket, etc.) kept in English.
 - Separate LuCI pages for settings, live Wi-Fi Calling status, and encrypted IMS activity.
 - UDP 500/4500 evidence with registration state, ePDG, ASSURED, packet totals, and last activity.
 - Logs only handshake success/failure and sustained encrypted communication (ringing or calls lasting a few seconds); each device independently keeps 20 records by default, and the activity log can be turned off in Settings.
 - `sing-box check` before startup and mode `0600` for credential-bearing files.
 
-## Compatibility
+## Node protocol selection (important)
 
-| Component | Support |
+> **⚠️ Use TCP-based protocols (AnyTLS / VLESS / VMess / Trojan) for gateway exit nodes.**
+>
+> - TCP-based tunnels deliver reliable, ordered transport under public-network loss/jitter: IPsec keepalives and RTP voice survive, which is what Wi-Fi Calling needs.
+> - **UDP/QUIC-based protocols (Hysteria2, TUIC) are not suitable in practice**: a node's "alive" state only proves ICMP reachability (not a proxy handshake), and UDP-in-UDP breaks calls immediately under jitter; a Hysteria2 node with a dead proxy path once left the routed device with **no internet**.
+> - WireGuard is UDP but has built-in keepalive/retransmission and works as an exit (the plugin auto-adapts to the sing-box ≥ 1.11 endpoint form).
+
+## Device tips
+
+- iOS enables "Private Wi-Fi Address" by default, which rotates the MAC and silently breaks hand-made DHCP bindings. Since 1.7.0 the plugin re-binds the device's current MAC from the live lease table on every service start — **reconnecting Wi-Fi (or rebooting the device) restores the binding automatically**, no manual config needed.
+- After adding a device policy, if the device's IP does not match the policy, toggle the device's Wi-Fi to re-request a DHCP lease.
+
+## Supported environments
+
+| Item | Scope |
 |---|---|
-| Firmware | OpenWrt / ImmortalWrt / iStoreOS with firewall4 and nftables |
-| 24.10 line (opkg/IPK) | One shared `.ipk` for OpenWrt 24.10, ImmortalWrt 24.10 and iStoreOS 24.10 — all verified |
-| 25.12 line (apk/APK) | One shared `noarch` `.apk` for OpenWrt / ImmortalWrt 25.12 — all targets verified |
-| 25.12 targets tested | x86_64 ✅ aarch64 ✅ armv7 ✅ mipsel ✅ (official 25.12.3 rootfs via qemu user-mode emulation) |
-| Hardware tested | ImmortalWrt 24.10.6, Redmi AX6S, aarch64_cortex-a53 (real router) |
-| iStoreOS verified | **24.10.7 full firmware (QEMU full-system emulation, same version as the reported issue)**: install + service active + LuCI Settings/Status/Activity Log pages verified in Simplified Chinese |
-| Container/emulation tested | Official OpenWrt 24.10.8 / 25.12.3 rootfs; iStoreOS 24.10.5 (Docker), 24.10.7 (full QEMU firmware) |
+| Firmware | OpenWrt / ImmortalWrt / iStoreOS, firewall4 + nftables |
+| 24.10 line (opkg/IPK) | One IPK for OpenWrt 24.10 / ImmortalWrt 24.10 / iStoreOS 24.10, all tested |
+| 25.12 line (apk/APK) | One noarch APK for OpenWrt / ImmortalWrt 25.12, all four architectures tested |
+| 25.12 architectures | x86_64 ✅ aarch64 ✅ armv7 ✅ mipsel ✅ (official 25.12.3 rootfs + qemu user-mode) |
+| Real router | ImmortalWrt 24.10.6, Redmi AX6S, aarch64_cortex-a53 |
+| iStoreOS | **24.10.7 full firmware (QEMU full-system, same version as the reported issue)**: install + service active + LuCI Settings/Status/Activity Log pages verified in Simplified Chinese |
+| Container/emulation | Official OpenWrt 24.10.8 / 25.12.3 rootfs; iStoreOS 24.10.5 (Docker), 24.10.7 (full QEMU firmware) |
 | sing-box | 1.13.0 or newer recommended; the IPK leaves it unversioned (compatible with older sing-box in some feeds); the 25.12 official feed ships sing-box (1.12.17 auto-installed on armv7/mipsel in tests). WireGuard nodes adapt automatically: endpoint form on sing-box ≥ 1.11, legacy outbound on 1.10.x and older (verified against real 1.10.0 / 1.11.7 / 1.12.0 / 1.13.18 binaries) |
 | LuCI | Modern JavaScript views |
 | Network | IPv4 LAN policies; DHCP static leases auto-synced from device policies (bind/clean MAC-IP on add/remove, tolerates iOS rotating private MACs) |
-| Package arch | IPK `all`; APK `noarch` (the 25.12 apk rejects `arch: all`; official 25.12 packages are built per target) |
+| Package arch | IPK `all` (Shell + LuCI resources); APK `noarch` (25.12 apk rejects `all`; official packages are distributed per target arch) |
 
 Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft-socket`, `ip-full`.
 
 ## Quick install
 
-Download the latest stable release (currently 1.6.0) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
+Download the latest stable release (currently 1.7.0) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
 
-**OpenWrt / ImmortalWrt / iStoreOS 24.10.x (opkg / IPK)** — one shared package, verified on real hardware:
+**OpenWrt / ImmortalWrt / iStoreOS 24.10.x (opkg / IPK)** — one package for all, verified on real hardware:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.6.0-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.7.0-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
-**iStoreOS note**: some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations — make sure the file was actually uploaded, then install by absolute path:
+> iStoreOS note: some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations. Verify the file was **actually uploaded** and use an absolute path:
+>
+> ```sh
+> opkg install /root/luci-app-wificalling-gateway_1.7.0-1_all.ipk
+> ```
+>
+> If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (verified), use the extract install (verified on the 24.10.7 full firmware):
+>
+> ```sh
+> cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.0-1_all.ipk && tar xzf data.tar.gz -C /
+> /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
+> ```
 
-```sh
-opkg install /root/luci-app-wificalling-gateway_1.6.0-1_all.ipk
-```
-
-If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (verified), install by extracting instead (verified on 24.10.7 full firmware):
-
-```sh
-cd /tmp && tar xzf luci-app-wificalling-gateway_1.6.0-1_all.ipk && tar xzf data.tar.gz -C /
-/etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
-```
-
-**OpenWrt / ImmortalWrt 25.12.x (apk / APK)** — one `noarch` package covering x86_64 / aarch64 / armv7 / mipsel, all tested:
+**OpenWrt / ImmortalWrt 25.12.x (apk / APK)** — one noarch package covering x86_64 / aarch64 / armv7 / mipsel, all verified:
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.6.0-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.0-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 
-Open **Services → Wi-Fi Calling Gateway**. Save a node first, then create a device policy. See the [installation](docs/en/INSTALL.md) and [configuration](docs/en/CONFIGURATION.md) guides.
+Then open **Services → Wi-Fi Calling Gateway**. Add and save nodes first, then add device policies. See [Install](docs/en/INSTALL.md) and [Configuration](docs/en/CONFIGURATION.md) for details.
 
-## Important boundary
+## Important boundaries
 
 > **⚠️ Location requirement (prerequisite for Wi-Fi Calling)**
 >
-> The carrier requires the device location to match the SIM card's home country before Wi-Fi Calling can activate. This plugin provides an IP in the corresponding country via the proxy node, but **does not control the device's own location** (GPS / cell tower / wloc). The device must use a virtual location tool to set its position to the SIM card's home country, otherwise Wi-Fi Calling will not trigger.
+> Carriers require the device location to match the SIM's home country before activating Wi-Fi Calling. This plugin provides a country-appropriate IP through the node, but it does **not** control the device's own location (GPS / cell towers / wloc). The device needs a virtual location set to the SIM's home country, otherwise Wi-Fi Calling will not trigger.
 >
-> **Solution**: use [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) with Shadowrocket to spoof iOS location to the SIM card's home country. This is a separate project independent of this plugin.
+> **Workaround**: use [ios-location-spoofer](https://github.com/smthdagg/ios-location-spoofer) together with Shadowrocket to spoof iOS location to the SIM's home country. This is a separate project from this plugin.
 
-This package provides routing and observable network evidence only. It does not change device location, carrier accounts, IMS provisioning, or emergency addresses. `likely_registered` only means a bidirectional `ASSURED` UDP 4500 flow was observed. An icon, UDP 500/4500 traffic, or high packet counts do not prove carrier activation or call completion. Follow carrier terms and local law, and validate with a real call.
+This plugin only provides network forwarding and observable evidence; it does not modify device location, carrier accounts, IMS configuration, or emergency-call addresses. `likely_registered` only means a bidirectional `ASSURED` UDP 4500 flow was observed; the Wi-Fi Calling indicator, UDP 500/4500, or high traffic alone do not prove the number is activated or that calls will connect. Follow carrier terms and local laws, and verify calling on a real device.
 
-## Documentation
+## Project documentation
 
-- [Install and upgrade](docs/en/INSTALL.md)
-- [Nodes and devices](docs/en/CONFIGURATION.md)
-- [Troubleshooting](docs/en/TROUBLESHOOTING.md)
-- [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
+- [Install & upgrade](docs/en/INSTALL.md)
+- [Node and device configuration](docs/en/CONFIGURATION.md)
+- [FAQ & troubleshooting](docs/en/TROUBLESHOOTING.md)
+- [Development & maintenance (for contributors / automated handoff)](DEVELOPER.md)
+- [Security policy](SECURITY.md) · [Changelog](CHANGELOG.md)
 
 ## License
 
