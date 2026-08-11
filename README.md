@@ -53,7 +53,7 @@
 | 容器/模拟验证 | OpenWrt 24.10.8 / 25.12.3 官方 rootfs；iStoreOS 24.10.5（Docker）、24.10.7（QEMU 完整固件） |
 | sing-box | 建议 1.13.0 或更高；IPK 不锁版本（兼容各源较旧版本），25.12 官方源自带（armv7/mipsel 实测自动装 1.12.17）。WireGuard 节点自动适配：sing-box ≥1.11 用 endpoint 形式，1.10.x 及更早用旧版 outbound（均经 1.10.0/1.11.7/1.12.0/1.13.18 实测） |
 | LuCI | JavaScript 视图（现代 LuCI） |
-| 网络 | IPv4 LAN 策略；设备必须使用 DHCP 静态租约 |
+| 网络 | IPv4 LAN 策略；设备策略自动同步 DHCP 静态租约（增删设备自动绑定/清理 MAC-IP，兼容 iOS 私有 MAC 变化） |
 | 包架构 | IPK `all`（Shell 与 LuCI 资源）；APK `noarch`（25.12 apk 不接受 `all`，官方包按目标架构分发） |
 
 依赖：`luci-base`、`sing-box`、`firewall4`、`kmod-nft-tproxy`、`kmod-nft-socket`、`ip-full`。

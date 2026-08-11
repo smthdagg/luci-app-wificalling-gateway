@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0 - 2026-08-11
+
+- **DHCP static leases are now auto-managed from device policies**: the nftables policy rules match a fixed client IPv4, but hand-made DHCP bindings silently broke when a device's MAC changed (iOS rotates its private Wi-Fi address) or when a policy was edited. A new `dhcp-sync.sh` runs on every service start: it creates/updates `wfc_`-prefixed DHCP host bindings from the live lease table (so a policy IP in use by a device always pins the device's current MAC), drops bindings whose policy was removed, and only touches plugin-created hosts (user-managed ones are left alone). `dnsmasq` is restarted only when something changed.
+- LuCI device policies gained a **DHCP binding** status column (Bound / MAC changed, rebind on reconnect / Not bound yet / Device offline / Following gateway), backed by new read ACLs for `dhcp` and `/tmp/dhcp.leases`.
+- Version bumped to 1.7.0; docs updated (README, README_EN).
+
 ## 1.6.0 - 2026-08-11
 
 - Added **Trojan** and **WireGuard** proxy node protocols: Trojan emits a sing-box `trojan` outbound (`password` + TLS with SNI/ALPN/insecure/pin); WireGuard works with every sing-box generation — `init.d` detects the installed version and emits the **wireguard endpoint** form (route rules target the endpoint tag) for sing-box ≥ 1.11, or the legacy wireguard **outbound** for 1.10.x and older. The legacy outbound was deprecated in 1.11.0 (gated behind `ENABLE_DEPRECATED_WIREGUARD_OUTBOUND`) and removed in 1.13.0, so this was verified with `sing-box check` against 1.10.0 / 1.11.7 / 1.12.0 / 1.13.18 real binaries.

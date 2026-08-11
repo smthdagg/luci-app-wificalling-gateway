@@ -53,7 +53,7 @@ This demonstrates the Wi-Fi Calling registration indicator on the device. Carrie
 | Container/emulation tested | Official OpenWrt 24.10.8 / 25.12.3 rootfs; iStoreOS 24.10.5 (Docker), 24.10.7 (full QEMU firmware) |
 | sing-box | 1.13.0 or newer recommended; the IPK leaves it unversioned (compatible with older sing-box in some feeds); the 25.12 official feed ships sing-box (1.12.17 auto-installed on armv7/mipsel in tests). WireGuard nodes adapt automatically: endpoint form on sing-box ≥ 1.11, legacy outbound on 1.10.x and older (verified against real 1.10.0 / 1.11.7 / 1.12.0 / 1.13.18 binaries) |
 | LuCI | Modern JavaScript views |
-| Network | IPv4 LAN policies; static DHCP leases required |
+| Network | IPv4 LAN policies; DHCP static leases auto-synced from device policies (bind/clean MAC-IP on add/remove, tolerates iOS rotating private MACs) |
 | Package arch | IPK `all`; APK `noarch` (the 25.12 apk rejects `arch: all`; official 25.12 packages are built per target) |
 
 Dependencies: `luci-base`, `sing-box`, `firewall4`, `kmod-nft-tproxy`, `kmod-nft-socket`, `ip-full`.
