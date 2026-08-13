@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.3 - 2026-08-13
+
+- **18.06/Lede 专包**：`luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk` 只声明 18.06 官方源实际提供的依赖（`luci-base`、`nftables`、`ip-full`），**官方 18.06.9 rootfs 实测安装成功**（nftables 0.9.0 自动解析）；不再注册 LuCI 菜单（18.06 的 Lua dispatcher 无法服务 JS 视图 action，避免坏条目）。服务本身是纯 Shell（init.d + libexec），可在 18.06 上运行；sing-box 与 TPROXY 内核模块由用户自备，缺失时 init.d 预检给出明确日志。LuCI 设置页面依赖 19.07+ 的 JS 视图架构，18.06 上通过命令行 UCI 配置。构建方式：`scripts/build-ipk.sh <版本> 1806`。
+
 ## 1.7.2 - 2026-08-13
 
 - **18.06/Lede install failure fixed (issue #1)**: the hard `firewall4` dependency is gone (the plugin configures nftables itself and never talks to the firewall4 daemon; on 18.06-style feeds the unresolvable dependency made opkg reject the whole package with `cannot find dependency firewall4` / `incompatible with the architectures configured`). The Makefile and the IPK builder now depend on the actual runtime needs (`nftables`, `kmod-nft-tproxy`, `kmod-nft-socket`); `init.d` preflights `nft`/`sing-box` and fails with a readable log message on firmwares that cannot run the gateway. Requirements and a dedicated troubleshooting entry (README zh/en, INSTALL, TROUBLESHOOTING zh/en) document the 18.06 situation.

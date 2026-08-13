@@ -5,7 +5,7 @@
 opkg 打不开文件，通常**不是包格式问题**，而是文件没真正到位：
 
 - 用 `ls -la <路径>` 确认文件真实存在，或通过 LuCI「系统 → 软件包 → 上传软件包」上传（上传对话框会显示 MD5/SHA256，能显示即文件已到位）。
-- 避免 `./` 相对路径（当前目录可能不是文件所在目录），用绝对路径安装：`opkg install /root/luci-app-wificalling-gateway_1.7.2-1_all.ipk`。
+- 避免 `./` 相对路径（当前目录可能不是文件所在目录），用绝对路径安装：`opkg install /root/luci-app-wificalling-gateway_1.7.3-1_all.ipk`。
 - 上传到 `/tmp` 时注意 tmpfs 挂载与上传工具的写入目标是否一致。
 
 ## iStoreOS 报 `incompatible with the architectures configured`
@@ -13,7 +13,7 @@ opkg 打不开文件，通常**不是包格式问题**，而是文件没真正�
 iStoreOS 的定制 opkg（koolcenter 版）对**本地文件安装**有架构检查限制（`all` 与具体架构都可能被拒），不影响包本身（格式已实测解析正常）。已实测可用的**解包安装**：
 
 ```sh
-cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.2-1_all.ipk && tar xzf data.tar.gz -C /
+cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.3-1_all.ipk && tar xzf data.tar.gz -C /
 /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 ```
 
@@ -22,19 +22,27 @@ cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.2-1_all.ipk && tar xzf data.
 OpenWrt 25.12 的 apk 不接受 `arch: all` 的包。请使用 **noarch** 版：
 
 ```sh
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.2-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.3-r1_noarch.apk
 ```
 
 一个 noarch 包覆盖 x86_64 / aarch64 / armv7 / mipsel 全芯片。
 
 ## 18.06/Lede 安装报 `cannot find dependency firewall4`
 
-Lede/OpenWrt 18.06 时代的固件**没有 `firewall4`**（它是 22.03 才引入的 nftables 防火墙框架），而 1.7.1 及更早版本的依赖里写死了它，opkg 因此把整包判为不可装。报错里的 `incompatible with the architectures configured` 是依赖无法解析的**连锁报错**，与 CPU 架构无关（IPK 是 `all` 架构）。
+**请直接使用 18.06 专包**：Release 里的 `luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk` 只依赖 18.06 官方源自带的 `luci-base`、`nftables`、`ip-full`，在官方 18.06.9 rootfs 上实测安装成功（nftables 0.9.0 自动解析）：
 
-1.7.2 起依赖改为实际运行需要（`nftables` 等，不再依赖 firewall4 守护进程）。但 **18.06 固件通常仍然缺 nftables TPROXY 内核模块（内核 ≥ 4.11 才有）与 sing-box**，即使装上也跑不起来——服务启动时会预检 `nft`/`sing-box` 并通过 `logread -e wificalling-gateway` 给出明确原因。建议：
+```sh
+opkg update
+opkg install ./luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk
+/etc/init.d/wificalling-gateway enable
+```
 
-- 使用 22.03+ / 23.05+ 系固件（ImmortalWrt 23.05/24.10、iStoreOS），或
-- 自行在 18.06 构建源里补上 sing-box、nftables、`kmod-nft-tproxy`、`kmod-nft-socket`（并确认内核 ≥ 4.11 支持 nft TPROXY）。
+背景：`firewall4` 是 22.03 才引入的 nftables 防火墙框架，18.06 时代的源里没有；1.7.1 及更早版本的依赖写死了它，opkg 因此整包拒装（`incompatible with the architectures configured` 是依赖无法解析的**连锁报错**，与 CPU 架构无关）。通用包（1.7.2+）已移除该依赖，但 18.06 官方源仍缺 sing-box 与 TPROXY 内核模块，所以只对 18.06 出专包。
+
+18.06 上的限制（专包已正确处理）：
+
+- **LuCI 页面不可用**：18.06 的 LuCI 是旧 Lua dispatcher，无法渲染本插件的 JS 视图页面（19.07+ 架构），专包因此不注册菜单；配置走命令行 UCI。
+- **sing-box 与 TPROXY 内核模块**（内核 ≥ 4.11）需你的源提供；缺失时服务启动预检失败，`logread -e wificalling-gateway` 会给出明确原因。
 
 ## 安装报 `cannot find dependency sing-box`
 

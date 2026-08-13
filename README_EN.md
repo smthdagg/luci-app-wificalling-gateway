@@ -80,7 +80,7 @@ The activity log records: handshake success / handshake failure / sustained comm
 
 | Item | Scope |
 |---|---|
-| Firmware | OpenWrt / ImmortalWrt / iStoreOS (22.03+ / 23.05+ line), nftables + TPROXY; **18.06/Lede is not supported** (its feeds lack firewall4 and usually the nftables TPROXY kmods and sing-box; see [Troubleshooting](docs/en/TROUBLESHOOTING.md)) |
+| Firmware | OpenWrt / ImmortalWrt / iStoreOS (22.03+ / 23.05+ line), nftables + TPROXY; **18.06/Lede has a dedicated package** (see "18.06/Lede package" below) |
 | 24.10 line (opkg/IPK) | One IPK for OpenWrt 24.10 / ImmortalWrt 24.10 / iStoreOS 24.10, all tested |
 | 25.12 line (apk/APK) | One noarch APK for OpenWrt / ImmortalWrt 25.12, all four architectures tested |
 | 25.12 architectures | x86_64 ✅ aarch64 ✅ armv7 ✅ mipsel ✅ (official 25.12.3 rootfs + qemu user-mode) |
@@ -96,26 +96,26 @@ Dependencies: `luci-base`, `sing-box`, `nftables`, `kmod-nft-tproxy`, `kmod-nft-
 
 ## Quick install
 
-Download the latest stable release (currently 1.7.2) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
+Download the latest stable release (currently 1.7.3) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
 
 **OpenWrt / ImmortalWrt / iStoreOS 24.10.x (opkg / IPK)** — one package for all, verified on real hardware:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.7.2-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.7.3-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 > iStoreOS note: some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations. Verify the file was **actually uploaded** and use an absolute path:
 >
 > ```sh
-> opkg install /root/luci-app-wificalling-gateway_1.7.2-1_all.ipk
+> opkg install /root/luci-app-wificalling-gateway_1.7.3-1_all.ipk
 > ```
 >
 > If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (verified), use the extract install (verified on the 24.10.7 full firmware):
 >
 > ```sh
-> cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.2-1_all.ipk && tar xzf data.tar.gz -C /
+> cd /tmp && tar xzf luci-app-wificalling-gateway_1.7.3-1_all.ipk && tar xzf data.tar.gz -C /
 > /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 > ```
 
@@ -123,11 +123,26 @@ opkg install ./luci-app-wificalling-gateway_1.7.2-1_all.ipk
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.2-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.7.3-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 
 Then open **Services → Wi-Fi Calling Gateway**. Add and save nodes first, then add device policies. See [Install](docs/en/INSTALL.md) and [Configuration](docs/en/CONFIGURATION.md) for details.
+
+### 18.06/Lede package
+
+18.06 feeds lack `firewall4` and usually also sing-box and the TPROXY kernel modules, so the generic package cannot install there. The **`luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk`** variant from Release depends only on what the official 18.06 feeds actually ship (`luci-base`, `nftables`, `ip-full`) — verified installing on the official 18.06.9 rootfs:
+
+```sh
+opkg update
+opkg install ./luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk
+/etc/init.d/wificalling-gateway enable
+```
+
+Notes:
+
+- The **LuCI pages** need the 19.07+ JS view architecture, which the legacy 18.06 Lua dispatcher cannot serve, so the variant does not register a menu; configure over UCI from the command line (`uci set wificalling-gateway.main.enabled=1`, etc.).
+- **sing-box and the TPROXY kernel modules** (kernel ≥ 4.11) must come from your feed; when missing, the service start fails with a clear reason in `logread -e wificalling-gateway`.
 
 ## Important boundaries
 
