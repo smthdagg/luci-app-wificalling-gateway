@@ -18,6 +18,18 @@
 
 > Note: the OpenWrt 25.12 apk-based package system rejects `arch: all` packages (official 25.12 packages are built per target), so the 25.12 APK uses the **`noarch`** architecture — one package covers every target.
 
+## Install the 18.06 package variant (Lede/18.06 line)
+
+18.06 feeds lack `firewall4` and usually also sing-box and the TPROXY kernel modules, so the generic package cannot install there. The **`luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk`** variant from Release depends only on what the official 18.06 feeds ship (`luci-base`, `nftables`, `ip-full`) -- verified installing on the official 18.06.9 rootfs:
+
+```sh
+opkg update
+opkg install ./luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk
+/etc/init.d/wificalling-gateway enable
+```
+
+Note: the 18.06 LuCI cannot render this plugin's JS pages (19.07+ architecture), so the variant registers no menu -- configure over UCI from the command line (see [Configuration](CONFIGURATION.md)); sing-box and the TPROXY kernel modules (kernel ≥ 4.11) must come from your feed, otherwise the service start preflight fails with a clear reason in `logread -e wificalling-gateway`.
+
 ## Install the Release IPK (24.10 line)
 
 ```sh

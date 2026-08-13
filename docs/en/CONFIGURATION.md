@@ -14,6 +14,39 @@ The monitor records handshake success/failure transitions once. Encrypted traffi
 
 **Monitoring capability boundary**: the ePDG/IPsec tunnel (inside UDP 4500) is fully encrypted -- the router only sees outer packet counts. Sustained bidirectional traffic after registration (the RTP signature of ringing or an in-call voice stream) is logged as **"Call in progress (inferred from sustained encrypted traffic)"**; SMS cannot be reliably distinguished (short bursts look like keepalives/pushes) and is therefore not logged; phone numbers, message content and call direction are never visible. Clearing this history does not modify system logs, nodes, or device policies.
 
+## 18.06/Lede: command-line configuration (no LuCI pages)
+
+The 18.06 LuCI is the legacy Lua dispatcher and cannot render this plugin's JS pages (19.07+ architecture), so the 18.06 package variant registers no menu. Configure everything over UCI from the command line:
+
+```sh
+# 1) Global switch
+uci set wificalling-gateway.main.enabled=1
+
+# 2) Add a node (named section so the policy can reference it)
+uci set wificalling-gateway.hknode=node
+uci set wificalling-gateway.hknode.enabled=1
+uci set wificalling-gateway.hknode.label='HK AnyTLS'
+uci set wificalling-gateway.hknode.protocol=anytls
+uci set wificalling-gateway.hknode.server=example.com
+uci set wificalling-gateway.hknode.port=443
+uci set wificalling-gateway.hknode.password=…   # set your secret the same way; never paste real secrets into public docs
+uci set wificalling-gateway.hknode.sni=cdn.example.com
+
+# 3) Add a device policy (node = the node section name)
+uci set wificalling-gateway.iphone12=device
+uci set wificalling-gateway.iphone12.enabled=1
+uci set wificalling-gateway.iphone12.label='iPhone12'
+uci set wificalling-gateway.iphone12.route_mode=independent
+uci set wificalling-gateway.iphone12.node=hknode
+uci add_list wificalling-gateway.iphone12.source_ip=192.168.31.175
+
+uci commit wificalling-gateway
+/etc/init.d/wificalling-gateway enable
+/etc/init.d/wificalling-gateway restart
+```
+
+Required fields per protocol match the LuCI form: `password` for AnyTLS/Hysteria2/Trojan; `uuid`+`password` for TUIC; `uuid`+`flow`+`public_key`+`short_id`+`fingerprint` for VLESS Reality; `uuid`+`transport=ws`+`path`+`host` for VMess WS; `private_key`+`public_key`+`local_address` for WireGuard (optional `reserved`/`mtu`). `route_mode` is `independent` (tunnel through the node) or `follow_gateway` (default routing). On service start the DHCP static leases are synced automatically and `nft`/`sing-box` are preflighted; failures are logged to `logread -e wificalling-gateway`.
+
 ## Wi-Fi Calling tips
 
 The following are device-side observations, **not plugin features**.

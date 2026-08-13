@@ -18,6 +18,18 @@
 
 > 说明：OpenWrt 25.12 的 apk 包体系不接受 `arch: all`（官方包按目标架构分发），因此 25.12 使用 `noarch` 架构的 APK——一个包覆盖所有芯片。
 
+## 安装 18.06 专包（Lede/18.06 系）
+
+18.06 的软件源没有 `firewall4`，也通常没有 sing-box 与 TPROXY 内核模块，通用包装不上。Release 里的 **`luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk`** 专包只依赖 18.06 官方源自带的 `luci-base`、`nftables`、`ip-full`（官方 18.06.9 rootfs 实测安装成功）：
+
+```sh
+opkg update
+opkg install ./luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk
+/etc/init.d/wificalling-gateway enable
+```
+
+注意：18.06 的 LuCI 无法渲染本插件的 JS 页面（19.07+ 架构），专包不注册菜单，配置走命令行 UCI（见[配置说明](CONFIGURATION.md)）；sing-box 与 TPROXY 内核模块（内核 ≥ 4.11）需你的源提供，缺失时服务启动预检失败，`logread -e wificalling-gateway` 会给出明确原因。
+
 ## 安装 Release IPK（24.10 系）
 
 ```sh

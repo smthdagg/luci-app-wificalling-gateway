@@ -40,7 +40,7 @@ dist/                            Built artifacts (gitignored)
 ## Local development loop
 
 ```sh
-# Tests (45 as of 1.7.0)
+# Tests (54 as of 1.7.3)
 python3 -m unittest discover -s tests
 
 # Syntax checks
@@ -51,8 +51,9 @@ for f in htdocs/luci-static/resources/view/wificalling-gateway/*.js htdocs/luci-
 python3 scripts/po2lmo.py po/zh_Hans/wificalling-gateway.po /tmp/test.lmo
 
 # Build (version is the single source of truth in Makefile + build scripts)
-./scripts/build-ipk.sh 1.7.0-1
-./scripts/build-apk.sh 1.7.0-r1        # requires Docker (alpine:edge apk mkpkg)
+./scripts/build-ipk.sh 1.7.3-1
+./scripts/build-ipk.sh 1.7.3-1 1806   # 18.06/Lede variant: deps luci-base/nftables/ip-full only, no menu.d
+./scripts/build-apk.sh 1.7.3-r1        # requires Docker (alpine:edge apk mkpkg)
 
 # Package sanity
 git diff --check    # whitespace; also run the PackageTests suite
@@ -63,6 +64,7 @@ git diff --check    # whitespace; also run the PackageTests suite
 - Version lives in `Makefile` (`PKG_VERSION`), `scripts/build-ipk.sh` (`version=${1:-...}`) and `scripts/build-apk.sh`. The PR forks' `Makefile` intentionally has **no** `PKG_VERSION` (upstream LuCI style).
 - Bump in `CHANGELOG.md` with dated entry. Update README install commands on every release.
 - Release artifacts: `.ipk` (gzip tar of `debian-binary`/`data.tar.gz`/`control.tar.gz` — the official ipkg-build format, **not** ar) and `.apk` (noarch, apk-tools v3 via Docker).
+- **18.06/Lede**: build a dedicated variant with `./scripts/build-ipk.sh <ver> 1806` — deps are only what the official 18.06 feeds ship (`luci-base`, `nftables`, `ip-full`) and `menu.d` is excluded (the legacy Lua dispatcher cannot serve JS views). Before every release, verify the variant installs on the official 18.06.9 rootfs (`docker import` the rootfs, `opkg install`) — the generic package cannot install there and must never be pointed at 18.06 users.
 
 ## Upstream PR workflow (important)
 
@@ -87,8 +89,8 @@ git diff --check    # whitespace; also run the PackageTests suite
 
 ## Known pitfalls (field-learned, keep these in mind)
 
-0. **Assume vs verify** - the meta-pitfall. Several regressions in this project came from confidently asserting something that was never checked: "two parallel PRs, either merges" (ImmortalWrt's CONTRIBUTING says otherwise), "Test Formalities failure is just an upstream workflow issue" (the PR was actually closed for being on the wrong repo), "label with `|` is fine" (the delimiter guard rejected 4 subscription nodes silently), "Hysteria2 node is alive" (ICMP reachable but proxy path dead -> device lost internet), "Map.save() persists" (it never commits the session changeset). **Before stating a fact that gates work, verify it against the source** (repo rules, real binaries, actual uci state). If unsure, say so and check first.
-1. **LuCI 24.10 "Save" button**: `Map.save()` alone never commits the session-scoped UCI changeset (only `apply` does), and the default footer Save handler resolves the Map via a DOM instance lookup that silently fails on this firmware. `overview.js` binds the footer Save button directly to `m.save().then(() => ui.changes.apply(true))`. Do not "simplify" this back to a plain `map.save()`.
+0. **Assume vs verify** - the meta-pitfall. Several regressions in this project came from confidently asserting something that was never checked: "two parallel PRs, either merges" (ImmortalWrt's CONTRIBUTING says otherwise), "Test Formalities failure is just an upstream workflow issue" (the PR was actually closed for being on the wrong repo), "label with `|` is fine" (the delimiter guard rejected 4 subscription nodes silently), "Hysteria2 node is alive" (ICMP reachable but proxy path dead -> device lost internet), "Map.save() persists" (it never commits the session changeset), "18.06 cannot install, so documenting why is enough" (a dedicated variant whose deps are exactly what the 18.06 feeds ship **does** install — verified on the official 18.06.9 rootfs; the generic package's hard `firewall4` dep was the actual blocker). **Before stating a fact that gates work, verify it against the source** (repo rules, real binaries, actual uci state). If unsure, say so and check first.
+1. **LuCI 24.10 "Save" button**: `Map.save()` alone never commits the session-scoped UCI changeset (only `ui.changes.apply()` does), and the default footer Save handler resolves the Map via a DOM instance lookup that silently fails under out-of-tree themes. `overview.js` overrides the supported `view.handleSave` hook: `m.save().then(() => ui.changes.apply(true))`, guarded by `if (ui.changes)` so older LuCI (where save applies directly) is unaffected. Do NOT patch footer buttons via DOM listeners — a co-registered listener double-saves and `stopPropagation` cannot suppress it (openwrt-ai review round 5); do NOT simplify back to a plain `map.save()`.
 2. **DummyValue in grid edit modals** renders its (always null) `cfgvalue`; the DHCP binding column overrides `renderWidget` and sets `rmempty = true` (without it the save parse rejects "must not be empty"). Grid rows use `textvalue`.
 3. **Delimiter guard vs labels**: `normalized.conf` is pipe-delimited; the guard covers every field that enters it. `label` must be **excluded** (subscription labels routinely contain `|`, e.g. `HK01|BGP|CMCU`) and sanitized in the `nodes`/`clients` files (`tr '|' ' '`).
 4. **Lease file format**: dnsmasq `/tmp/dhcp.leases` lines are `expiry MAC IP hostname clientid` - IP is field 3, MAC is field 2 (both `dhcp-sync.sh` and `overview.js` parse this). The lease file path is a UCI option (`dhcp.@dnsmasq[0].leasefile`), not always `/tmp/dhcp.leases`.

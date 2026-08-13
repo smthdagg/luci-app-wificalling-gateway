@@ -49,6 +49,39 @@ Proxy nodes 列表直接显示节点存活状态、Ping/延迟和质量等级。
 
 “清空日志”只清理本插件的活动文件，不影响系统日志、节点或设备配置。
 
+## 18.06/Lede：命令行配置（无 LuCI 页面）
+
+18.06 的 LuCI 是旧版 Lua dispatcher，无法渲染本插件的 JS 页面（19.07+ 架构），18.06 专包因此不注册菜单，配置全部通过命令行 UCI 完成：
+
+```sh
+# 1) 全局开关
+uci set wificalling-gateway.main.enabled=1
+
+# 2) 添加节点（具名段便于后面引用）
+uci set wificalling-gateway.hknode=node
+uci set wificalling-gateway.hknode.enabled=1
+uci set wificalling-gateway.hknode.label='HK AnyTLS'
+uci set wificalling-gateway.hknode.protocol=anytls
+uci set wificalling-gateway.hknode.server=example.com
+uci set wificalling-gateway.hknode.port=443
+uci set wificalling-gateway.hknode.password=…   # 密码按同样方式设置，勿写入公开文档
+uci set wificalling-gateway.hknode.sni=cdn.example.com
+
+# 3) 添加设备策略（node 填节点段的段名）
+uci set wificalling-gateway.iphone12=device
+uci set wificalling-gateway.iphone12.enabled=1
+uci set wificalling-gateway.iphone12.label='iPhone12'
+uci set wificalling-gateway.iphone12.route_mode=independent
+uci set wificalling-gateway.iphone12.node=hknode
+uci add_list wificalling-gateway.iphone12.source_ip=192.168.31.175
+
+uci commit wificalling-gateway
+/etc/init.d/wificalling-gateway enable
+/etc/init.d/wificalling-gateway restart
+```
+
+各协议的必需字段与 LuCI 页面一致：AnyTLS/Hysteria2/Trojan 用 `password`；TUIC 用 `uuid`+`password`；VLESS Reality 用 `uuid`+`flow`+`public_key`+`short_id`+`fingerprint`；VMess WS 用 `uuid`+`transport=ws`+`path`+`host`；WireGuard 用 `private_key`+`public_key`+`local_address`（可选 `reserved`/`mtu`）。`route_mode` 填 `independent`（独立通道）或 `follow_gateway`（跟随网关）。服务启动时会自动同步 DHCP 静态租约并预检 `nft`/`sing-box`，失败原因查看 `logread -e wificalling-gateway`。
+
 ## Wi-Fi Calling 操作要点
 
 以下为设备侧操作经验，**不是插件功能**，仅供配置参考。
