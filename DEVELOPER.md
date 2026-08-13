@@ -100,7 +100,9 @@ git diff --check    # whitespace; also run the PackageTests suite
 
 ## Verifying on the reference router
 
-The reference device is an ImmortalWrt 24.10.6 Redmi AX6S (sing-box 1.13.16) with several real subscription nodes and an iPhone policy. Standard verification after deploying:
+> **The plugin was uninstalled from the reference router (192.168.31.1) on 2026-08-13** — the user switched to another solution (`luci-app-wificalling-location-gateway`, which is still running and even depended on this plugin). Do **not** reinstall or redeploy this plugin to that router or suggest it. From now on verify via rootfs simulation (docker import of official OpenWrt 24.10.8 / 25.12.3 / 18.06.9 rootfs + opkg/apk install) and the local unit tests instead of a real device.
+
+Historical verification flow (kept for reference): the reference device was an ImmortalWrt 24.10.6 Redmi AX6S (sing-box 1.13.16) with several real subscription nodes and an iPhone policy. Standard verification after deploying:
 
 - `opkg install --force-reinstall` the new IPK, restart `rpcd` and the service.
 - Check `status.json`, `sing-box.json` (compile output), `clients`, nftables `clients4`, `wfc_` DHCP hosts, `node-status.json`.
