@@ -2,7 +2,7 @@
 
 ## 1.7.4 - 2026-08-14
 
-- **VMess/Reality 校验崩溃修复**：节点表单的 `securityOpt.validate` 调用了不存在的 `this.map.getSectionValue()`（60f81a2 引入，LuCI 从未提供该 API），编辑 VLESS 节点时会崩溃。改用 `this.section.formvalue()` 读取弹窗内的实时协议值——`uci.get()` 读的是已保存状态，会让新建的 VMess+Reality 节点漏过校验、已存在的 VMess 节点改成 VLESS 时被误拒。openwrt-ai round 6 确认。PR#8921 对应提交同时修正了提交身份与 Signed-off-by（Formality 要求）。
+- **VMess/Reality 校验崩溃修复**：节点表单的 `securityOpt.validate` 调用了不存在的 `this.map.getSectionValue()`（60f81a2 引入，LuCI 从未提供该 API），编辑 VLESS 节点时会崩溃。改用 `this.section.formvalue()` 读取弹窗内的实时协议值——`uci.get()` 读的是已保存状态，会让新建的 VMess+Reality 节点漏过校验、已存在的 VMess 节点改成 VLESS 时被误拒；校验失败时返回可读消息而非字面 `false`（openwrt-ai round 6/7 确认）。PR#8921 对应提交同时修正了提交身份与 Signed-off-by（Formality 要求）。
 
 ## 1.7.3 - 2026-08-13
 
