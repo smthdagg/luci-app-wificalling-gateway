@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.4 - 2026-08-14
+
+- **VMess/Reality 校验崩溃修复**：节点表单的 `securityOpt.validate` 调用了不存在的 `this.map.getSectionValue()`（60f81a2 引入，LuCI 从未提供该 API），编辑 VLESS 节点时会崩溃。改用 `this.section.formvalue()` 读取弹窗内的实时协议值——`uci.get()` 读的是已保存状态，会让新建的 VMess+Reality 节点漏过校验、已存在的 VMess 节点改成 VLESS 时被误拒。openwrt-ai round 6 确认。PR#8921 对应提交同时修正了提交身份与 Signed-off-by（Formality 要求）。
+
 ## 1.7.3 - 2026-08-13
 
 - **18.06/Lede 专包**：`luci-app-wificalling-gateway_1.7.3-1_18.06_all.ipk` 只声明 18.06 官方源实际提供的依赖（`luci-base`、`nftables`、`ip-full`），**官方 18.06.9 rootfs 实测安装成功**（nftables 0.9.0 自动解析）；不再注册 LuCI 菜单（18.06 的 Lua dispatcher 无法服务 JS 视图 action，避免坏条目）。服务本身是纯 Shell（init.d + libexec），可在 18.06 上运行；sing-box 与 TPROXY 内核模块由用户自备，缺失时 init.d 预检给出明确日志。LuCI 设置页面依赖 19.07+ 的 JS 视图架构，18.06 上通过命令行 UCI 配置。构建方式：`scripts/build-ipk.sh <版本> 1806`。
