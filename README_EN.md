@@ -29,8 +29,11 @@ The screenshot proves the handset reached the Wi-Fi Calling registration state; 
 ## Features
 
 - **Seven node protocols**: AnyTLS, Hysteria2, TUIC, VLESS Reality, VMess WebSocket, Trojan and WireGuard.
-- Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, VMess, Trojan (`trojan://`) and WireGuard (`wg://`) share links with local browser-side parsing.
+- Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, VMess, Trojan (`trojan://`) and WireGuard (`wg://`) share links, plus standard WireGuard `[Interface]/[Peer]` config blocks, with local browser-side parsing; WireGuard preshared keys (PSK) are supported.
+- **Real WireGuard handshake health checks**: instead of guessing from ICMP, a temporary sing-box endpoint verifies the tunnel handshake and reports the verified exit IP (60 s cache).
 - **Automatic DHCP static lease management**: adding/removing a device policy auto-binds/cleans the MAC-IP static lease, tolerating iOS rotating private Wi-Fi addresses (random MACs); the device policy table shows the live binding state (Bound / Not bound yet / MAC changed / Device offline).
+- **Add devices from connected LAN devices**: the device policy editor offers a picker of devices seen in DHCP/ARP (hostname preferred, ARP-only entries as fallback; excludes the router and already-bound IPs) and fills the label and IP for you — ARP fallback keeps static-IP and DHCP-less routers reporting online.
+- **Service health monitoring**: the Wi-Fi Calling status page shows sing-box/monitor processes, generated-config validity, a **stale-config warning** (UCI changed but the service was not restarted), nftables rule count and a node health summary.
 - One selected node per device policy; multiple fixed private IPv4 addresses per policy.
 - **Independent tunnel** routes through the plugin node; **Follow gateway** is not intercepted and uses the router default routing.
 - One sing-box process, nftables TPROXY, transparent TCP and UDP routing.

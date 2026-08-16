@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.8.0 - 2026-08-16
+
+- **对齐 wloc 集成项目（WifiCalling&Wloc Gateway）的 Wi-Fi Calling 部分**（从路由器上运行的 1.0.11 包逐文件比对抽取，仅 wificalling 相关）：
+  - **WireGuard 预共享密钥（PSK）**：`pre_shared_key` 字段贯通 init.d → compiler（endpoint 的 per-peer `pre_shared_key` 与 legacy outbound 顶层）→ LuCI 表单 → `[Interface]/[Peer]` 配置块粘贴导入（`parseWireguardConf`）。
+  - **compiler 设备容错**：设备策略引用已删除的节点时不再整体编译失败——跳过该设备并警告（其余设备继续代理，失效设备回落到直连）。
+  - **WireGuard 真实握手健康检查**：`node-health.sh` 对 WireGuard 节点不再用 ICMP，而是临时起 sing-box endpoint 经 HTTP 代理访问回显服务验证握手（60 秒缓存，输出验证通过的出口 IP；`WFC_SING_BOX` 可覆盖路径）。
+  - **紧凑节点状态输出**：`node-status.json` 精简为 `id/state/measurement/ping_ms`，并导出到 `/www/wificalling-node-status.json` 由页面以 GET 读取——规避部分固件上 /ubus 通道截断大响应的问题。
+  - **ARP 兜底在线检测**：无 DHCP 租约（静态 IP / 纯 AP 路由器）时用 ARP 缓存判断设备在线，`Device offline` 只在两个来源都不知道设备时报告。
+  - **从已连接设备添加**：设备策略编辑弹窗新增「从已连接设备」选择器（DHCP 主机名优先，ARP-only 条目兜底；排除路由器自身与已绑定 IP），自动填写名称和 IP；IP 占位符按 LuCI 访问地址推导子网。
+  - **服务健康监控**：新增 `service-health.sh`（每 60 秒由 procd 实例驱动），监控 sing-box/monitor 进程、生成配置有效性、**配置过期检测**（UCI 修改后未重启 → 告警）、nftables 规则数、设备数、节点健康汇总；「Wi-Fi Calling 状态」页顶部新增「服务状态」区渲染并告警。
+- 新增中文翻译条目（22 条），61/61 测试通过（新增 PSK 字段对齐、未知节点容错、WG 握手验证、服务健康 4 组测试）。
+
 ## 1.7.4 - 2026-08-14
 
 - **VMess/Reality 校验崩溃修复**：节点表单的 `securityOpt.validate` 调用了不存在的 `this.map.getSectionValue()`（60f81a2 引入，LuCI 从未提供该 API），编辑 VLESS 节点时会崩溃。改用 `this.section.formvalue()` 读取弹窗内的实时协议值——`uci.get()` 读的是已保存状态，会让新建的 VMess+Reality 节点漏过校验、已存在的 VMess 节点改成 VLESS 时被误拒；校验失败时返回可读消息而非字面 `false`（openwrt-ai round 6/7 确认）。PR#8921 对应提交同时修正了提交身份与 Signed-off-by（Formality 要求）。
