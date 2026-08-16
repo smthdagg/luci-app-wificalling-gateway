@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.8.1 - 2026-08-17
+
+- **再次对齐 wloc 项目 1.2.0**（wloc 1.2 回退了上一轮抽取的部分功能，本次只取其新增，不引入回退）：
+  - **节点即时测试（nodeTest）**：节点表格每行新增「nodeTest」按钮，通过新的 rpcd 插件 `luci.wificalling-gateway`（`node_test` 方法，不依赖 wloc 域后端）触发——WireGuard 节点复用 node-health.sh 的握手函数做**绕过 60 秒缓存**的即时握手测试，其他协议做 TCP 可达性探测（tcping，无则 busybox nc）；结果以横幅通知显示（握手出口 IP / 失败原因）。
+  - **握手失败原因分类**：`node-health.sh` 缓存与状态输出新增 `reason` 字段（`config_missing` / `timeout` / `unreachable`），状态列悬停显示详细说明；握手测试前校验密钥/地址缺失时快速失败。
+  - **握手测试锁串行化**：mkdir 锁 + PID 存活接管，防止 5 秒监控 tick 与进行中的握手测试竞争同一探测端口（互给错误出口 IP）；锁被占用时测试返回 `busy`。
+  - **reserved 转发**：握手探测配置转发 WireGuard `reserved`（WARP 风格端点必需，否则握手必失败）；探测端口改为 id 哈希派生。
+  - **表单精简**：节点字段全部 `modalonly`（表格只显示名称/协议/服务器/端口/状态/延迟/质量，编辑弹窗可见全部字段），名称列不再重复；设备选择器 DOM id 修正为 `widget.cbid`（1.0.11 选择器在弹窗中失效的 bug）。
+- 新增 rpcd 插件 `luci.wificalling-gateway`（exec 插件，`node_test` 方法白名单）+ ACL；10 条新中文翻译；66/66 测试通过。
+
 ## 1.8.0 - 2026-08-16
 
 - **对齐 wloc 集成项目（WifiCalling&Wloc Gateway）的 Wi-Fi Calling 部分**（从路由器上运行的 1.0.11 包逐文件比对抽取，仅 wificalling 相关）：
