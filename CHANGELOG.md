@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.8.2 - 2026-08-17
+
+- **openwrt-ai round 8 review 修复**（10 条 + 3 nit 全部处理）：
+  - **compiler 顶层重复 PSK 删除**：endpoint 形式的 `pre_shared_key` 只保留在 peer 内（顶层是 sing-box 不认识的字段，会导致 `sing-box check` 失败、整个服务启动中止）。
+  - **握手探测加固**：探测配置以 0600 创建（含 WG 私钥/PSK）并纳入信号 trap 清理；`wg_handshake_test` 全部变量 `local` 声明。
+  - **回显服务 HTTPS + 可配置**：握手探测的出口回显改用 HTTPS 并支持 `main.probe_url` 配置（默认 `https://ip-api.com/json/?fields=query`），不再明文披露出口 IP、避免特定主机不可达导致的误报。
+  - **node-status 回 `$RUNDIR`**：撤销 /www docroot 导出（未认证 LAN 可读 + 每 30 秒写 flash + 卸载残留）；紧凑输出已消除 /ubus 截断的诱因；overview 改回 `fs.read`（ACL 保护）。
+  - **ACL 补 `/proc/net/arp`**：ARP 兜底在线检测与连接设备选择器此前因权限被拒而失效。
+  - **服务监控精确匹配**：`singbox_running` 只匹配网关自身实例（`sing-box run -c $RUNDIR/sing-box.json`），握手探测的临时实例不再误报。
+  - **设备选择器改用 `getUIElement`**：不再用 DOM id 寻址（GridSection 弹窗中行与弹窗同一 option 实例化两次，`cbid` 歧义）；`source_ip` 统一 `L.toArray` 防手写单值配置导致页面崩溃。
+  - nit：status.js 注释改英文。
+- 66/66 测试通过。
+
 ## 1.8.1 - 2026-08-17
 
 - **再次对齐 wloc 项目 1.2.0**（wloc 1.2 回退了上一轮抽取的部分功能，本次只取其新增，不引入回退）：
