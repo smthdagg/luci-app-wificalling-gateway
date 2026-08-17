@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.8.3 - 2026-08-17
+
+- **openwrt-ai round 9 review 修复**（3 项实质 + 5 项 nit 全部处理）：
+  - **握手测试锁修正**：`mkdir` 失败且持有者存活时**不再并发执行**（此前会覆盖持有者 pid、在同一探测端口起第二个 sing-box、并把锁从运行中的测试下移除）——改为回退缓存或失败；死锁接管修正 `kill -0 0` 误判（pid 文件缺失时不再接管自己）。
+  - **探测子 shell 化**：探测（配置生成 → sing-box → 回显 → kill）整体放入子 shell，EXIT trap 只清理子 shell 自己的临时文件——不再清除调用者的 trap（此前 node-health 的 `$tmp` 清理丢失、node-test.sh 每次手动测试泄漏 `/tmp/wg-test-func.*`）；失败原因判断也移入子 shell（日志在 trap 清理前完成诊断）。
+  - **回显驱动改用 curl（硬依赖）**：`/usr/bin/wget` 在官方 OpenWrt 是 uclient-fetch（无 http_proxy 支持）、busybox wget 的 HTTPS 默认关闭——探测改用包硬依赖的 `curl -x`（经 http inbound 的 CONNECT 隧道），wget 仅作降级兜底；`DEPENDS` 增加 `+curl`（含 18.06 专包）。
+  - **表格精简补全**：`pre_shared_key` 与 `_device_picker` 补 `modalonly`（此前残留"WireGuard preshared key"凭据列和空选择器列）。
+  - nit：nodeTest 按钮改 `_('Test')` 可翻译；`testNotify` 改用 `ui.addNotification`（不再重造横幅）；rpcd `list` 声明 `id` 参数；node-test.sh 注释 40 秒修正。
+- 68/68 测试通过（新增 curl 优先、锁竞争 2 组测试）。
+
 ## 1.8.2 - 2026-08-17
 
 - **openwrt-ai round 8 review 修复**（10 条 + 3 nit 全部处理）：
