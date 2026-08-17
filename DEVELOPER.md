@@ -78,6 +78,59 @@ git diff --check    # whitespace; also run the PackageTests suite
   - When updating the PR: copy changed files from the release repo into the fork checkout, run the full local verification, commit with the proper identity, push, then wait for FormalityCheck (three jobs) to pass. Force-push only when amending your own unpushed commit.
   - `gh pr edit` is broken by the Projects-classic GraphQL deprecation; update the PR body via `gh api repos/openwrt/luci/pulls/8921 -X PATCH --input <json>` instead.
 
+## Release workflow (small-version release, 固化流程)
+
+Every small version (1.8.x) follows the same fixed flow. Run `scripts/release.sh <version>` — it bumps the version everywhere, runs the full local verification, builds all three platforms and runs the docker install tests on the official rootfs of each. What it does **not** do: write the CHANGELOG entry, commit, push, or publish the Release — those stay manual (below).
+
+```sh
+# 1) Write the CHANGELOG.md entry for the new version FIRST (dated, same
+#    style as previous entries). Then:
+./scripts/release.sh 1.8.4
+#    The script: bumps Makefile/build-ipk.sh/build-apk.sh/tests/README(zh+en)
+#    -> unit tests + sh -n + node --check + git diff --check
+#    -> builds generic ipk, 18.06 variant ipk, noarch apk
+#    -> docker install tests on official rootfs:
+#       OpenWrt 24.10.8 (generic ipk via opkg),
+#       OpenWrt 18.06.9 (18.06 variant via opkg, distfeeds configured),
+#       OpenWrt 25.12.3 (noarch apk via apk --allow-untrusted)
+#       (rootfs tarballs cached under dist/rootfs/; docker images cached)
+#    -> writes dist/sha256sums-<ver>.txt and prints the manual next steps
+
+# 2) Commit (Smth Dagg identity, Signed-off-by, subject <= 80):
+git add -A && git -c user.name="Smth Dagg" -c user.email="smthdagg@gmail.com" commit -s -m "..."
+git push origin main
+
+# 3) Sync the PR fork (only the in-scope files) and push:
+cp -R htdocs/. /tmp/luci-fork1/applications/luci-app-wificalling-gateway/htdocs/
+cp -R root/.  /tmp/luci-fork1/applications/luci-app-wificalling-gateway/root/
+cp -R po/.    /tmp/luci-fork1/applications/luci-app-wificalling-gateway/po/
+cp Makefile README.md /tmp/luci-fork1/applications/luci-app-wificalling-gateway/
+cd /tmp/luci-fork1
+git add applications/luci-app-wificalling-gateway/
+git -c user.name="Smth Dagg" -c user.email="smthdagg@gmail.com" commit -s -m "luci-app-wificalling-gateway: <lowercase verb> ..."
+git push origin luci-app-wificalling-gateway
+#    PR commit rules: subject <= 80, prefix + lowercase word, Signed-off-by.
+
+# 4) Check the PR and wait for FormalityCheck (three jobs) to pass:
+gh pr checks 8921 --repo openwrt/luci
+
+# 5) Publish the Release (Latest) with the three artifacts + checksums:
+cd dist
+gh release create v1.8.4 --title "Wi-Fi Calling Gateway 1.8.4" \
+  luci-app-wificalling-gateway_1.8.4-1_all.ipk \
+  luci-app-wificalling-gateway_1.8.4-1_18.06_all.ipk \
+  luci-app-wificalling-gateway_1.8.4-r1_noarch.apk \
+  sha256sums-1.8.4.txt
+```
+
+Known release pitfalls (all hit in the field):
+
+- **README version drift**: every version bump must update the README install references (current-version line + package filenames in the commands, zh + en). The script does this mechanically — the CHANGELOG entry is the only manual doc edit.
+- **18.06 test needs the variant**: the 18.06 docker test must install the `_18.06_all.ipk` (feed-only deps), never the generic ipk — the script swaps the package between the 24.10 and 18.06 runs.
+- **Docker mounts**: test packages must live under the repo tree (`dist/rootfs/wfc-pkgs`); macOS Docker Desktop does not share `/tmp`, so `/tmp` mounts come up empty.
+- **25.12 rootfs is double-gzipped** (`-generic-targz-rootfs.img.gz` = gzip of tar.gz); the script pipes it through `gzip -dc` twice for `docker import`.
+- Release only after FormalityCheck is green on the PR head; the Release and the PR head should always describe the same version.
+
 ## Pre-submission checklist (run before every push)
 
 - [ ] **Verify the target repo's contribution rules first** (read its CONTRIBUTING / README) - do not assume the submission channel from memory. This was not done for ImmortalWrt and the PR was closed.
