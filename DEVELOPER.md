@@ -78,6 +78,77 @@ git diff --check    # whitespace; also run the PackageTests suite
   - When updating the PR: copy changed files from the release repo into the fork checkout, run the full local verification, commit with the proper identity, push, then wait for FormalityCheck (three jobs) to pass. Force-push only when amending your own unpushed commit.
   - `gh pr edit` is broken by the Projects-classic GraphQL deprecation; update the PR body via `gh api repos/openwrt/luci/pulls/8921 -X PATCH --input <json>` instead.
 
+## PR submission & review-response standard (提交回复标准)
+
+Fixed rules for every commit and every review round on `openwrt/luci#8921`. Follow them verbatim — every item below was learned from an actual Formality failure or review finding.
+
+### A. Commit standard (every PR commit)
+
+- **Identity**: author/committer must be `Smth Dagg <smthdagg@gmail.com>`. The local git identity is `Ethan.Y` — always override with `-c user.name="Smth Dagg" -c user.email="smthdagg@gmail.com"` (Formality rejects `Ethan.Y`).
+- **`Signed-off-by:`** present in every commit (`-s`).
+- **Subject**: `luci-app-wificalling-gateway: <lowercase word> ...`, hard limit **80 chars** (Formality counts; `(1.8.x)` suffixes often push it over — drop them).
+- **Body**: MUST contain a meaningful description (what + why). A body with only `Signed-off-by:` fails Formality ("body is empty or contains only trailers").
+- Fixing an already-pushed commit: `git commit --amend` + `git push --force-with-lease`. Never add a second "fixup" commit for identity/format issues.
+- Every commit in the branch is checked, including docs-only bumps.
+
+### B. Pre-push checklist
+
+1. Full local verification: `python3 -m unittest discover -s tests`, `sh -n` on all shell, `node --check` on all JS, `git diff --check`, `po2lmo.py` compile, `.pot`/`.po` ASCII order.
+2. PR-scope files only: `htdocs/ root/ po/ Makefile README.md` (LICENSE stays). Do NOT add tests, scripts, docs/, CHANGELOG, DEVELOPER.
+3. `git status --short` in the fork must show exactly the intended files — stray files (`.bak`, an accidentally copied `.pot`) get caught here, not by the reviewer.
+4. After syncing, `diff -rq` the five PR-scope paths against the main repo — they must be identical.
+5. New user-visible strings: `_()` in JS + matching `.pot`/`.po` entries (ASCII position) + lmo compile check.
+
+### C. Review-round workflow (收到 review 后)
+
+1. Read the review body AND every inline comment (`gh api repos/openwrt/luci/pulls/8921/comments`) — the body says "the rest, inline" and the inline list is usually longer.
+2. Classify: real bugs (must fix) / improvements / nits. Fix all three — nits left open get re-raised.
+3. Fix with a regression test per class (at least one assertion per finding).
+4. Full verification + build both IPK variants.
+5. Push the main repo first, then sync + push the PR fork (commit per section A).
+6. Reply in the standard format (below), then wait ~45 s and confirm all three FormalityCheck jobs pass; on failure apply section D and amend.
+7. Wait for the next round (~12 h cadence). Do not start unrelated work in between.
+
+### D. Reply format (回复模板)
+
+```
+## <version> — round <N> findings fixed
+
+Addressed in `<commit>`:
+
+1. **<finding>** — <what was wrong and why it mattered>; now <how it is fixed>.
+2. ...
+N. Nits: ...
+
+<tests> tests pass (new: <new tests>); both IPK variants build.
+```
+
+- Reference the commit hash and one line per finding, in the reviewer's order.
+- Acknowledge when the reviewer is right (they usually are — verify, don't argue from memory); if you intentionally deviate, state the reason and the trade-off.
+- Include the test count and what the new tests cover.
+
+### E. Formality failure catalogue (all hit in the field)
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Git & Commits fail | author/committer `Ethan.Y` | override identity (A) |
+| Git & Commits fail | missing `Signed-off-by:` | `-s` |
+| Git & Commits fail | subject > 80 chars | shorten; drop version suffix |
+| Git & Commits fail | capital after prefix (`WG psk`) | lowercase first word |
+| Git & Commits fail | body only trailers | add description (A) |
+| Code Patches fail | whitespace errors | `git diff --check` |
+| OpenWrt Makefiles fail | Makefile deviates from template | keep SPDX header/structure |
+
+### F. Review hot-spots (openwrt-ai 高频检查点)
+
+- **Invented APIs/fields**: `form.Map#getSectionValue` never existed; `pre_shared_key` at endpoint top level is not a sing-box field. Verify against the real schema/source before using.
+- **Permissions & secrets**: every file read from JS must be in the rpcd ACL (`/proc/net/arp` was missed once); credential-bearing files mode 0600; no docroot (`/www`) exports (unauthenticated LAN read + flash writes); temporary secrets cleaned by traps (in a subshell, not by clearing the caller's trap).
+- **Shell portability**: dash arithmetic (`${id#cfg} % 1000` is fatal for `cfgXXXXXX`), busybox defaults (HTTPS wget off, `/usr/bin/wget` is uclient-fetch), `local` declarations, `kill -0 0` semantics.
+- **Concurrency**: mkdir-lock races, `pgrep -f` matching the wrong instance (pin the full command line).
+- **UI**: address widgets via `getUIElement()` (DOM ids are ambiguous in GridSection modals), `modalonly` for credential/empty columns, `L.toArray` for list options, use `ui.addNotification` instead of reimplementing it, every user-visible string through `_()`.
+- **Privacy/external deps**: no plaintext disclosure to third parties, hard dependencies declared in DEPENDS, configurable endpoints documented.
+- **Docs consistency**: comments in `htdocs/` are English; README wording must match the implementation (button names, version references).
+
 ## Release workflow (small-version release, 固化流程)
 
 Every small version (1.8.x) follows the same fixed flow. Run `scripts/release.sh <version>` — it bumps the version everywhere, runs the full local verification, builds all three platforms and runs the docker install tests on the official rootfs of each. What it does **not** do: write the CHANGELOG entry, commit, push, or publish the Release — those stay manual (below).
