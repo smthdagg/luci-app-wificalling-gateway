@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.4 - 2026-08-18
+
+- **openwrt-ai round 10 review 修复**（锁协议完善 + busy 区分 + nit）：
+  - **pidless 锁按"持有中"处理**：无 pid 文件的锁目录是正常瞬时状态（`mkdir`→`echo $$` 之间、每次释放窗口），不再被立即接管——用锁目录**年龄**做废弃判断（超过探测预算 ~60 秒才接管），消除释放方误删新持有者锁、第三个 tick 在同一探测端口起第二个 sing-box 的竞态。
+  - **释放单步化**：`release_lock()` 先验证 pid 仍是自己再 `rm -rf`（两步 unlink 会在接管场景删掉新持有者的锁）。
+  - **竞争状态区分 busy**：锁被占用且无可用缓存时输出 `reason=busy`（"测试进行中"）而非 `unreachable`——此前 13ms 内对未探测的节点误报"服务器不可达"。
+  - nit：`testNotify` 注释归位 + detail 分隔符；`wg_handshake_test` 补 `local result`；版本 bump 与 README 引用在同一版本内（合并时整体 squash 由上游处理）。
+- 71/71 测试通过（新增 pidless 年轻锁 held、老锁接管、live holder 无缓存 busy 3 组测试）。
+
 ## 1.8.3 - 2026-08-17
 
 - **openwrt-ai round 9 review 修复**（3 项实质 + 5 项 nit 全部处理）：
