@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.8.7 - 2026-08-19
+
+- **全面审计修复（发布后审计发现 2 个 compiler bug）**：
+  - **endpoint 分支未跳过未使用 WG 节点**：1.8.6 的 unused-node skip 只覆盖了 outbounds，endpoint 模式的未使用 WireGuard 节点仍生成孤儿 endpoint（无路由规则引用，纯占内存）——补齐跳过。
+  - **endpoint 跳过节点后的逗号错误**：跳过一个或多个端点后，`w<nw` 的逗号判断会多输出逗号导致 JSON 解析失败（`Expecting value`）——改用"是否已输出过"标志。
+- 73/73 测试通过（新增 endpoint 模式未使用节点跳过断言）。
+
 ## 1.8.6 - 2026-08-19
 
 - **openwrt-ai round 12 修复**：
