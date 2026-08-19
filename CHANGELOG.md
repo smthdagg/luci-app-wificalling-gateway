@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.5 - 2026-08-18
+
+- **openwrt-ai round 11 review 修复**（锁状态处理完善）：
+  - **dead-pid 锁立即接管**：持有者已死（pid 存在但进程不存在）时不再等 60 秒年龄——`kill -0` 失败且 pid 非空 → 直接接管（round 10 误将 dead-pid 混入 "held" 分支，与 pidless 的正常瞬时状态同等处理）。
+  - **busy 不写结果缓存**：竞争返回时不写 60s cache → 解除锁后下一个 tick 可立即重试，不再被"忙"缓存压制整整一分钟。
+  - **状态形式区分**：竞争返回 `state=testing`（新状态，前端显示"测试进行中"）而非 `handshake_failed`+reason=busy——Status 和 Quality 列不再对未探测节点显示 "Offline"。
+- `release.sh` 版本 bump 的 sed pattern 改为 `PKG_VERSION:=[0-9.]*`（`.*` 会贪婪吞掉引号导致 Python 语法错误）。
+- 71/71 测试通过。
+
 ## 1.8.4 - 2026-08-18
 
 - **openwrt-ai round 10 review 修复**（锁协议完善 + busy 区分 + nit）：

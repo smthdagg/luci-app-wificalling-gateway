@@ -59,7 +59,7 @@ The firewall rules identify devices **by IP address**: the `source_ip` entered i
 
 So the device IP must be fixed, which is what a DHCP static lease (binding the device MAC to the policy IP) provides. Since 1.7.0 the plugin reconciles this binding automatically from the live lease table on every service start:
 
-- Adding a device policy → the policy IP gets bound to the MAC of whichever device currently 1.8.4leases it;
+- Adding a device policy → the policy IP gets bound to the MAC of whichever device currently 1.8.5leases it;
 - Removing a policy → its binding is cleaned up;
 - When iOS rotates its private Wi-Fi MAC, reconnecting Wi-Fi (or rebooting) lets the plugin re-bind the new MAC automatically — no manual config.
 
@@ -100,26 +100,26 @@ Dependencies: `luci-base`, `sing-box`, `nftables`, `kmod-nft-tproxy`, `kmod-nft-
 
 ## Quick install
 
-Download the latest stable release (currently 1.8.4) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
+Download the latest stable release (currently 1.8.5) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
 
 **OpenWrt / ImmortalWrt / iStoreOS 24.10.x (opkg / IPK)** — one package for all, verified on real hardware:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.8.4-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.8.5-1_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 > iStoreOS note: some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations. Verify the file was **actually uploaded** and use an absolute path:
 >
 > ```sh
-> opkg install /root/luci-app-wificalling-gateway_1.8.4-1_all.ipk
+> opkg install /root/luci-app-wificalling-gateway_1.8.5-1_all.ipk
 > ```
 >
 > If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (verified), use the extract install (verified on the 24.10.7 full firmware):
 >
 > ```sh
-> cd /tmp && tar xzf luci-app-wificalling-gateway_1.8.4-1_all.ipk && tar xzf data.tar.gz -C /
+> cd /tmp && tar xzf luci-app-wificalling-gateway_1.8.5-1_all.ipk && tar xzf data.tar.gz -C /
 > /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 > ```
 
@@ -127,7 +127,7 @@ opkg install ./luci-app-wificalling-gateway_1.8.4-1_all.ipk
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.8.4-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_1.8.5-r1_noarch.apk
 /etc/init.d/rpcd restart
 ```
 
@@ -135,11 +135,11 @@ Then open **Services → Wi-Fi Calling Gateway**. Add and save nodes first, then
 
 ### 18.06/Lede package
 
-18.06 feeds lack `firewall4` and usually also sing-box and the TPROXY kernel modules, so the generic package cannot install there. The **`luci-app-wificalling-gateway_1.8.4-1_18.06_all.ipk`** variant from Release depends only on what the official 18.06 feeds actually ship (`luci-base`, `nftables`, `ip-full`) — verified installing on the official 18.06.9 rootfs:
+18.06 feeds lack `firewall4` and usually also sing-box and the TPROXY kernel modules, so the generic package cannot install there. The **`luci-app-wificalling-gateway_1.8.5-1_18.06_all.ipk`** variant from Release depends only on what the official 18.06 feeds actually ship (`luci-base`, `nftables`, `ip-full`) — verified installing on the official 18.06.9 rootfs:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.8.4-1_18.06_all.ipk
+opkg install ./luci-app-wificalling-gateway_1.8.5-1_18.06_all.ipk
 /etc/init.d/wificalling-gateway enable
 ```
 
