@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.6 - 2026-08-19
+
+- **openwrt-ai round 12 修复**：
+  - **node-test.sh 手动测试的 busy 处理**：`wg_handshake_test` 竞争返回 2 时直接输出 `reason=busy`（不再读空缓存误报 `unreachable`）——"Server unreachable" 从「测试」按钮上也消除。
+  - 锁块缩进修正（round 11 重构时丢了一个 tab）。
+- **同步 wloc 项目的 compiler 内存优化（unused node skip）**：未被任何设备策略引用的节点不再生成 sing-box outbound——减少配置体积与 sing-box 运行内存；现有测试适配（给被检查节点补充设备引用），新增 `test_compiler_skips_unused_nodes` 断言。
+- 73/73 测试通过。
+
 ## 1.8.5 - 2026-08-18
 
 - **openwrt-ai round 11 review 修复**（锁状态处理完善）：
