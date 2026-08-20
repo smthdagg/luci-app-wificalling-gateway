@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.9 - 2026-08-20
+
+- **openwrt-ai round 14 修复**（确认 round 13 主修复正确后的 3 个清理）：
+  - 删除 outbounds 循环中重复的 wireguard+endpoint 跳过（`wg_check` 前重复了一份，后者不可达）。
+  - 删除 node 规则中残留的校验说明注释（校验已迁移到 `wg_check`，注释原地残留）。
+  - **busy 提示改为 info 而非 error**：`runNodeTest` 的 `state=failed` 分支不再带 "Unable to test node:" 前缀和红色失败样式——busy 场景显示中性提示（"Test in progress — Another test is running right now"）。
+- 74/74 测试通过。
+
 ## 1.8.8 - 2026-08-19
 
 - **openwrt-ai round 13 修复**：
