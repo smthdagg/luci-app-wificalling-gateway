@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.8 - 2026-08-19
+
+- **openwrt-ai round 13 修复**：
+  - **endpoint 逗号逻辑修正**：1.8.7 的 `first?"":","` 把逗号放在元素前，导致两个被引用 WG 节点编译出非法 JSON（`json.load()` 失败、`sing-box check` 拒绝）——改为**前导逗号**（每个已输出元素后/前正确分隔，跳过节点不影响）。
+  - **unused-skip 覆盖节点校验**：WG 必填字段校验从 node 规则（used[] 尚未建立）**延迟到 emit 循环**（`wg_check`）——未被引用且缺键的节点被跳过，不再拖垮整个编译（与 device 侧 warn+skip 一致）；被引用的坏节点仍报错。
+  - nit：`runNodeTest` 增加 `state=failed` 分支（busy 等无探测结果场景显示原因而非落入默认分支）。
+- 74/74 测试通过（新增：未引用缺键 WG 节点跳过、被引用坏节点仍 fail）。
+
 ## 1.8.7 - 2026-08-19
 
 - **全面审计修复（发布后审计发现 2 个 compiler bug）**：
