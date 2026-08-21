@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.12 - 2026-08-22
+
+- **openwrt-ai round 17 修复**（3 个 nit）：
+  - `wgFailReason` 注释更新（覆盖 node-test 来源的 reason：no_server / no_health_script / no_tcp_probe / busy）。
+  - **`tcp_failed` 不再被丢弃**：`unreachable` 分支传入 `wgFailDetail('unreachable')`——AnyTLS/VLESS/VMess/Trojan 节点探测失败显示 "Offline — Server unreachable"（与 WireGuard 一致），复用已有目录字符串。
+  - **补齐缺失目录字符串**：`Device offline`（DHCP 绑定列）、`Security`（字段标签）进入 pot/po（中文界面此前残留英文）。
+- 74/74 测试通过。
+
 ## 1.8.11 - 2026-08-21
 
 - **openwrt-ai round 16 修复**：
