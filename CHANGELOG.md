@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.8.11 - 2026-08-21
+
+- **openwrt-ai round 16 修复**：
+  - **未映射失败原因汉化**：`no_health_script` / `no_tcp_probe` 增加 `wgFailReason` 映射（`no_tcp_probe` 在未安装 tcping/nc 的固件上触发，属常见情况）与中文翻译；`no_tcp_probe` 增加 `wgFailDetail`（提示安装 tcping 或 nc）。rpcd 内部错误（`no_node_id` 等）保持原文（内部故障）。
+  - **config_missing 语义拆分**：`node-test.sh` 的 server/port 缺失改用独立 `no_server` reason（与 `node-health.sh` 的 WG 密钥缺失语义分开），避免 Trojan/VLESS 无服务器节点被提示"缺少密钥/地址"。
+- 74/74 测试通过（node-test config_missing 断言改为 no_server）。
+
 ## 1.8.10 - 2026-08-20
 
 - **openwrt-ai round 15 修复**：busy 的 info 提示**仅限 busy**——1.8.9 把整个 `state=failed` 分支改成中性提示，误伤 `config_missing` / `no_health_script` / `no_tcp_probe`（这些是真实失败）；现在仅 `reason=busy` 显示 info，其余保持红色错误横幅 + "Unable to test node:" 前缀。
