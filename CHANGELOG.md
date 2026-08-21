@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.10 - 2026-08-20
+
+- **openwrt-ai round 15 修复**：busy 的 info 提示**仅限 busy**——1.8.9 把整个 `state=failed` 分支改成中性提示，误伤 `config_missing` / `no_health_script` / `no_tcp_probe`（这些是真实失败）；现在仅 `reason=busy` 显示 info，其余保持红色错误横幅 + "Unable to test node:" 前缀。
+- 74/74 测试通过。
+
 ## 1.8.9 - 2026-08-20
 
 - **openwrt-ai round 14 修复**（确认 round 13 主修复正确后的 3 个清理）：
