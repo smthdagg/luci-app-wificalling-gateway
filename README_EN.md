@@ -1,6 +1,6 @@
 # Wi-Fi Calling Gateway
 
-[中文](README.md) · [Install](docs/en/INSTALL.md) · [Configure](docs/en/CONFIGURATION.md) · [Troubleshoot](docs/en/TROUBLESHOOTING.md) · [Development](DEVELOPER.md)
+[中文](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/README.md) · [Install](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/docs/en/INSTALL.md) · [Configure](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/docs/en/CONFIGURATION.md) · [Troubleshoot](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/docs/en/TROUBLESHOOTING.md) · [Development](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/DEVELOPER.md)
 
 A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes selected LAN clients through selected sing-box outbounds while leaving other clients on the normal gateway routing. It also reports observable ePDG/IPsec UDP 500/4500 evidence commonly associated with Wi-Fi Calling.
 
@@ -59,7 +59,7 @@ The firewall rules identify devices **by IP address**: the `source_ip` entered i
 
 So the device IP must be fixed, which is what a DHCP static lease (binding the device MAC to the policy IP) provides. Since 1.7.0 the plugin reconciles this binding automatically from the live lease table on every service start:
 
-- Adding a device policy → the policy IP gets bound to the MAC of whichever device currently 1.8.12leases it;
+- Adding a device policy → the policy IP gets bound to the MAC of whichever device currently leases it;
 - Removing a policy → its binding is cleaned up;
 - When iOS rotates its private Wi-Fi MAC, reconnecting Wi-Fi (or rebooting) lets the plugin re-bind the new MAC automatically — no manual config.
 
@@ -100,26 +100,26 @@ Dependencies: `luci-base`, `sing-box`, `nftables`, `kmod-nft-tproxy`, `kmod-nft-
 
 ## Quick install
 
-Download the latest stable release (currently 1.8.12) from [Releases](../../releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
+Download the latest stable release from [Releases](https://github.com/smthdagg/luci-app-wificalling-gateway/releases), upload it to the router, then install. **One `.ipk` for the whole 24.10 line, one `noarch` `.apk` for the whole 25.12 line (any chip).**
 
 **OpenWrt / ImmortalWrt / iStoreOS 24.10.x (opkg / IPK)** — one package for all, verified on real hardware:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.8.12-1_all.ipk
+opkg install ./luci-app-wificalling-gateway_<version>_all.ipk
 /etc/init.d/rpcd restart
 ```
 
 > iStoreOS note: some opkg builds report a misleading "No such file or directory" for `./` relative paths or upload locations. Verify the file was **actually uploaded** and use an absolute path:
 >
 > ```sh
-> opkg install /root/luci-app-wificalling-gateway_1.8.12-1_all.ipk
+> opkg install /root/luci-app-wificalling-gateway_<version>_all.ipk
 > ```
 >
 > If the iStoreOS custom opkg rejects local files with `incompatible with the architectures configured` (verified), use the extract install (verified on the 24.10.7 full firmware):
 >
 > ```sh
-> cd /tmp && tar xzf luci-app-wificalling-gateway_1.8.12-1_all.ipk && tar xzf data.tar.gz -C /
+> cd /tmp && tar xzf luci-app-wificalling-gateway_<version>_all.ipk && tar xzf data.tar.gz -C /
 > /etc/init.d/wificalling-gateway enable && /etc/init.d/wificalling-gateway start
 > ```
 
@@ -127,19 +127,19 @@ opkg install ./luci-app-wificalling-gateway_1.8.12-1_all.ipk
 
 ```sh
 apk update
-apk add --allow-untrusted ./luci-app-wificalling-gateway_1.8.12-r1_noarch.apk
+apk add --allow-untrusted ./luci-app-wificalling-gateway_<version>_noarch.apk
 /etc/init.d/rpcd restart
 ```
 
-Then open **Services → Wi-Fi Calling Gateway**. Add and save nodes first, then add device policies. See [Install](docs/en/INSTALL.md) and [Configuration](docs/en/CONFIGURATION.md) for details.
+Then open **Services → Wi-Fi Calling Gateway**. Add and save nodes first, then add device policies. See [Install](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/docs/en/INSTALL.md) and [Configuration](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/docs/en/CONFIGURATION.md) for details.
 
 ### 18.06/Lede package
 
-18.06 feeds lack `firewall4` and usually also sing-box and the TPROXY kernel modules, so the generic package cannot install there. The **`luci-app-wificalling-gateway_1.8.12-1_18.06_all.ipk`** variant from Release depends only on what the official 18.06 feeds actually ship (`luci-base`, `nftables`, `ip-full`) — verified installing on the official 18.06.9 rootfs:
+18.06 feeds lack `firewall4` and usually also sing-box and the TPROXY kernel modules, so the generic package cannot install there. The **`luci-app-wificalling-gateway_<version>_18.06_all.ipk`** variant from Release depends only on what the official 18.06 feeds actually ship (`luci-base`, `nftables`, `ip-full`) — verified installing on the official 18.06.9 rootfs:
 
 ```sh
 opkg update
-opkg install ./luci-app-wificalling-gateway_1.8.12-1_18.06_all.ipk
+opkg install ./luci-app-wificalling-gateway_<version>_18.06_all.ipk
 /etc/init.d/wificalling-gateway enable
 ```
 
@@ -160,10 +160,10 @@ This plugin only provides network forwarding and observable evidence; it does no
 
 ## Project documentation
 
-- [Install & upgrade](docs/en/INSTALL.md)
-- [Node and device configuration](docs/en/CONFIGURATION.md)
-- [FAQ & troubleshooting](docs/en/TROUBLESHOOTING.md)
-- [Development & maintenance (for contributors / automated handoff)](DEVELOPER.md)
+- [Install & upgrade](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/docs/en/INSTALL.md)
+- [Node and device configuration](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/docs/en/CONFIGURATION.md)
+- [FAQ & troubleshooting](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/docs/en/TROUBLESHOOTING.md)
+- [Development & maintenance (for contributors / automated handoff)](https://github.com/smthdagg/luci-app-wificalling-gateway/blob/main/DEVELOPER.md)
 - [Security policy](SECURITY.md) · [Changelog](CHANGELOG.md)
 
 ## License

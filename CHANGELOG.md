@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.8.13 - 2026-08-22
+
+- **openwrt-ai round 18 修复**：
+  - `wgFailReason` 注释补 `tcp_failed`；`unreachable` 分支改传 `r.reason`（不再硬编码字面量绕过映射表）；`wgFailDetail` 增加 `tcp_failed` → Server unreachable（复用已有 msgid）。
+  - **PR 内 README 适配上游语境**：导航栏与正文中的相对文档链接（docs/、README_EN.md、DEVELOPER.md）与 `[Releases](../../releases)` 在 openwrt/luci 树内均为死链——全部改为指向独立发布仓库的绝对 URL；快速安装命令**去除硬编码版本号**（改用 `<版本>` 占位符），消除每次 bump 重写 7 行 README 的维护负担。
+- 74/74 测试通过。
+
 ## 1.8.12 - 2026-08-22
 
 - **openwrt-ai round 17 修复**（3 个 nit）：
