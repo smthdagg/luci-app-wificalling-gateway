@@ -6,22 +6,22 @@ A standalone LuCI package for OpenWrt and ImmortalWrt. It transparently routes s
 
 ### Settings
 
-![Wi-Fi Calling Gateway settings page](docs/images/overview.png)
+![Wi-Fi Calling Gateway settings page](https://raw.githubusercontent.com/smthdagg/luci-app-wificalling-gateway/main/docs/images/overview.png)
 
 ### Wi-Fi Calling status
 
-![Wi-Fi Calling status page](docs/images/device-status.png)
+![Wi-Fi Calling status page](https://raw.githubusercontent.com/smthdagg/luci-app-wificalling-gateway/main/docs/images/device-status.png)
 
 ### Activity log
 
-![Encrypted IMS activity log page](docs/images/activity-log.png)
+![Encrypted IMS activity log page](https://raw.githubusercontent.com/smthdagg/luci-app-wificalling-gateway/main/docs/images/activity-log.png)
 
 ### Real-device observation
 
 An actual iPhone showing **EE WiFiCall** in Airplane Mode over Wi-Fi:
 
 <p align="center">
-  <img src="docs/images/iphone-ee-wificall.jpg" alt="iPhone showing EE WiFiCall" width="420">
+  <img src="https://raw.githubusercontent.com/smthdagg/luci-app-wificalling-gateway/main/docs/images/iphone-ee-wificall.jpg" alt="iPhone showing EE WiFiCall" width="420">
 </p>
 
 The screenshot proves the handset reached the Wi-Fi Calling registration state; number activation and calling capability must still be confirmed with a real call or by the carrier.

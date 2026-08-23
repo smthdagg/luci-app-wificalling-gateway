@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.16 - 2026-08-23
+
+- **openwrt-ai round 15 修复**：
+  - **append_ip 完整 IPv4+RFC1918 校验**：此前的字符集 guard 放过了 `1.2`/`10.5`/`10.0.0.300`/`8.8.8.8`，这些值会进入 normalized.conf 并触发 compiler `private4()` 的 fail()——**整个网关编译失败**而非跳过坏 IP。现镜像 private4() 的 quad+range+RFC1918 检查，手写 UCI 的坏值跳过并记录日志。
+  - **README 资产链接绝对化**：4 张截图改 raw.githubusercontent、SECURITY.md/CHANGELOG.md 行改 blob 绝对 URL——合并进 openwrt/luci 后不再 404。
+  - `wgFailReason` 补 `tcp_failed` → Unreachable（与 wgFailDetail 对称）。
+- 版本 bump：PKG_VERSION 1.8.15 → 1.8.16，README 六处安装引用同步更新。
+- 74/74 测试通过；三平台 docker 安装测试全部通过。
+
 ## 1.8.14 - 2026-08-22
 
 - **主动自查（18 轮 review 检查点全覆盖）发现并修复**：
