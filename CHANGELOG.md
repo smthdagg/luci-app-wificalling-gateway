@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.17 - 2026-08-24
+
+- **openwrt-ai round 17 修复**：
+  - **唯一 IP 被拒的设备跳过而非拖垮网关**：设备的所有 source_ip 都被校验拒绝时 DEVICE_IPS 为空，compiler 此前会 `fail("device has no client IP")` 使整个网关启动失败——现在 init.d 记录日志并跳过该设备（回落直连路由），与其余设备的 stale-node skip 一致；compiler END 块与 firewall.sh 对空列表已有安全处理。
+  - **source_ip 输入收紧为 RFC1918**：LuCI 的 ip4addr datatype 接受任意 IPv4（含公网/CGNAT）——新增 validate 只允许私网地址并在输入时给出可读提示。
+  - nit：版本号不再跳号（1.8.16 → 1.8.17）；`wgFailReason` 的 `tcp_failed` arm 为防御性对称（当前不可达），保留。
+- 74/74 测试通过。
+
 ## 1.8.16 - 2026-08-23
 
 - **openwrt-ai round 15 修复**：
