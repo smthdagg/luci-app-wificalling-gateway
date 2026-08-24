@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.9.3 - 2026-08-25
+
+- **openwrt-ai round 20 修复**：
+  - **设备策略无法保存**：`source_ip` 的 validate 对 DynamicList 容器校验器传来的空值返回错误，导致加了第一个地址后整个策略 `validState=false` 保存不了——空值现在直接通过（"至少一个地址"由 `rmempty` 负责）。
+  - **Transport 下拉缺 grpc/httpupgrade**：订阅导入的 grpc/httpupgrade 节点，编辑保存时 `ui.Select` 找不到对应选项而回退 None，传输被静默清空——下拉补上 `gRPC`/`HTTPUpgrade` 选项；`WebSocket path`/`WebSocket Host` 标签泛化为 `Transport path`/`Transport host`（目录同步更新，删孤儿）。
+  - **gRPC `service_name` 空值错误兜底**：compiler 与导入器把空 service_name 补成 `"/"`，实际拨号 `///Tun` 必败——现在保持为空字符串（compiler vless/vmess + 导入器 vless/vmess 共 4 处）。
+  - **握手防抖吞掉真实掉线**：防抖时钟与 `sustained_traffic` 共用 `old_event`，通话刚结束 15s 内的真实掉线（registered→not_detected）被丢弃——新增独立握手时间戳 `old_hs`（monitor.state 第 12 字段，向后兼容），sustained 不再重置它。
+  - nit：`follow_gateway` 设备在空 IP 检查前提前返回（不再误报 "no valid client IP"）；sing-box 内存 profile 注释改为自洽说明（去掉外部项目引用）。
+- 82/82 测试通过（新增：空 service_name、sustained 后掉线、round20 内容断言）。
+
 ## 1.9.2 - 2026-08-24
 
 - **修复 1.8.17 遗留的 i18n 缺口**（全面审计发现）：`Invalid IPv4 address` 与 `Only private IPv4 addresses (RFC1918) are supported` 两个校验提示此前未进目录，zh-Hans 界面显示英文——现已加入 pot/po（无效的 IPv4 地址 / 仅支持私网 IPv4 地址（RFC1918））。pot/po 现 170 条一致、LC_ALL=C 排序正确、po2lmo 编译通过。
