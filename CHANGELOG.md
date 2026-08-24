@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.2 - 2026-08-24
+
+- **修复 1.8.17 遗留的 i18n 缺口**（全面审计发现）：`Invalid IPv4 address` 与 `Only private IPv4 addresses (RFC1918) are supported` 两个校验提示此前未进目录，zh-Hans 界面显示英文——现已加入 pot/po（无效的 IPv4 地址 / 仅支持私网 IPv4 地址（RFC1918））。pot/po 现 170 条一致、LC_ALL=C 排序正确、po2lmo 编译通过。
+- 79/79 测试通过。
+
 ## 1.9.1 - 2026-08-24
 
 - **对齐 wloc gateway 主项目更新（relax lite memory profile）**：
