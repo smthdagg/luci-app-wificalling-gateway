@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.0 - 2026-08-24
+
+- **对齐 wloc gateway 1.3 的 wifigateway 增量**（只取新增、不回退）：
+  - **grpc/httpupgrade 传输支持**：compiler.sh 现在为 VLESS/VMess 节点生成 grpc（service_name 走 path 槽位）与 httpupgrade 传输块，订阅导入（node-import.js）同步支持 `type=grpc`/`type=httpupgrade` 的 vless:// 与 vmess:// 链接。
+  - **xhttp 传输显式拒绝**：xhttp 是 clash/mihomo 的传输，sing-box 无法运行——导入时给出可读报错，编译时 `fail()` 拒绝，避免生成 sing-box 启动即拒绝的配置。
+  - **握手事件 15 秒防抖**：registered↔not_detected 抖动（一秒内翻转）此前每次翻转都写一条握手事件刷爆活动日志——现在每个设备最多每 15 秒记一条握手成功/失败事件，与持续通讯事件的节流一致。
+- 79/79 测试通过（新增：grpc/httpupgrade 编译、xhttp 拒绝、握手防抖）。
+
 ## 1.8.17 - 2026-08-24
 
 - **openwrt-ai round 17 修复**：
