@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.1 - 2026-08-24
+
+- **对齐 wloc gateway 主项目更新（relax lite memory profile）**：
+  - **sing-box 低内存 profile**：init.d 为 sing-box 进程设置 `GOMAXPROCS=1` 与 `GOGC=75`（单 worker + 适度 GC），降低受限路由器的常驻内存；不再设置上游已移除的 `GOMEMLIMIT=24MiB` 硬上限（AX6S 突发内存需求证明该上限过紧）。
+- 79/79 测试通过（新增：内存 profile 断言）。
+
 ## 1.9.0 - 2026-08-24
 
 - **对齐 wloc gateway 1.3 的 wifigateway 增量**（只取新增、不回退）：
