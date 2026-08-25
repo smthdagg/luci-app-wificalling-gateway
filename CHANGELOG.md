@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.4 - 2026-08-25
+
+- **openwrt-ai round 21 修复**（3 个 nit）：
+  - **follow_gateway 设备误报日志**：`route_mode` 检查移到 `source_ip` 解析之前——`append_ip` 的逐地址告警和空 IP "skipping" 都不再对 follow_gateway 设备触发。
+  - **node-import.js 缩进**：ws/grpc/httpupgrade 块恢复到与兄弟块一致的缩进（纯格式修正）。
+  - **gRPC 手选后的字段语义**：`Transport path` 增加说明（WebSocket/HTTPUpgrade 用路径，gRPC 用 service name）；`Transport host` 改为仅 transport=ws/httpupgrade 时显示（gRPC 编译臂不使用 host）。
+- 82/82 测试通过；目录 170 msgid 一致、排序与 parity 正确、po2lmo 通过。
+
 ## 1.9.3 - 2026-08-25
 
 - **openwrt-ai round 20 修复**：
