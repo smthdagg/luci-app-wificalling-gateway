@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.5 - 2026-08-26
+
+- **openwrt-ai round 22 修复**：
+  - **hostOpt.depends 副作用**：`host` 同时是 VLESS/VMess 在 `sni` 为空时的 TLS `server_name` 兜底；用 depends 隐藏 host 会因非激活选项在保存时被从 UCI 删除，剥掉导入节点的证书名——已移除 depends，`host` 对所有传输保持激活（gRPC 下 host 无意义的歧义由 `Transport path` 的说明覆盖）。
+  - **node-import.js vless 分支缩进**：`out.uuid`~`out.short_id`（50-58 行）统一到与兄弟一致的 2 tab（此前遗留的 3 tab，round 21 只修了 ws/grpc/httpupgrade 块）。
+- 82/82 测试通过。
+
 ## 1.9.4 - 2026-08-25
 
 - **openwrt-ai round 21 修复**（3 个 nit）：
