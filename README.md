@@ -169,3 +169,31 @@ opkg install ./luci-app-wificalling-gateway_<版本>_18.06_all.ipk
 ## 许可证
 
 [MIT](LICENSE)。本项目与 Apple、任何移动运营商、OpenWrt、ImmortalWrt、sing-box 或 PassWall 均无隶属关系。
+
+---
+
+## OpenWrt 私有源安装 / Install from the private OpenWrt feed
+
+本项目已在私有 OpenWrt 软件源中预留目录（目录名与仓库同名）：
+`https://smthdagg.github.io/Smthdagg-Repo-feeds/luci-app-wificalling-gateway/`
+
+> 本包也可通过整合包 wificalling-location-gateway 获得；独立发布面向只需要 LuCI 界面的设备。
+>
+> This package is also shipped inside the integrated wificalling-location-gateway package; the standalone publish targets devices that only need the LuCI UI.
+>
+包发布后，在 OpenWrt 路由器上执行 / Once packages are published, run on the router:
+
+```sh
+# 1) 导入签名公钥（一次即可，长期不变） / import the signing key (once, long-lived)
+wget -O /etc/opkg/keys/f7050198aa77cf15 \
+  https://raw.githubusercontent.com/smthdagg/Smthdagg-Repo-feeds/main/wloc.pub
+# 2) 添加本项目源 / add this project's feed
+echo "src/gz luci-app-wificalling-gateway https://smthdagg.github.io/Smthdagg-Repo-feeds/luci-app-wificalling-gateway" \
+  >> /etc/opkg/customfeeds.conf
+# 3) 安装 / install
+opkg update && opkg install luci-app-wificalling-gateway
+```
+
+> 状态：目录已预留，尚未发布 OpenWrt 包；发布后本节会更新为具体版本号。
+>
+> Status: directory reserved, no packages published yet; this section will be updated with concrete versions once packages ship.
