@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.9.7 - 2026-09-11
+
+- **openwrt-ai round 30/31 修复**：
+  - **status.js Node 列**：状态文件里带的是 sing-box outbound tag（`node-<section id>`），不是 section id——原先直接拿它去 `uci.get()` 永远查不到，Node 列一直显示 `node-cfgXXXX`。现在先剥掉 `node-` 前缀再查 label，并恢复无节点时的 `-` 兜底。
+  - **overview.js 租约文件回退**：回退改为只在读取被 rpcd **拒绝**时触发（`.catch`）；配置的 leasefile 只是"当前没有租约"时不再被 `/tmp/dhcp.leases` 顶替，绑定列与真实绑定保持一致。
+  - **node-health.sh node id 白名单**：id 校验从 `wg_handshake_test` 内部移到状态输出循环（`$RUNDIR/nodes` 的 id 是 UCI section 名，libuci 只接受 `[A-Za-z0-9_]`），非法 id 直接跳过，不再插进 `/tmp/wg-health-*` 路径或 JSON，也不会被误报成普通的 unreachable 节点。
+  - **node-test.sh `invalid_id`**：补上 `wgFailReason`/`wgFailDetail` 分支和 zh_Hans 文案，测试横幅不再显示裸的英文标识符。
+  - **init.d stop_service 无条件清理**：原先只在 `enabled=0` 时清理 `wfc_` host，而这个 hook 无法区分 restart 与 stop（两者都带 `enabled=1`），于是显式 `stop` 和卸载包时 `/etc/config/dhcp` 会残留 `wfc_` host 且再无机会被清除。现在改为无条件执行；restart 时 `start_service` 会重新同步绑定，代价是每次重启多一次 UCI 提交与 dnsmasq reload，无可清理项时 `clear` 是空操作。
+  - **PKG_VERSION 1.9.6 → 1.9.7**：上一提交的主题宣告了 1.9.7 但 Makefile 没同步，这里补上，版本号保持连续。
+- **测试**：修复 8 个因行为变更而过期的用例（monitor 握手事件现在需要 `monitor.state` 基线 ×6；Save/Save & Apply 合并路径 ×1；版本号硬编码 ×1），并新增 4 个回归用例：首次 tick 不伪造握手事件、非法 node id 被跳过、Node 列正确解析 outbound tag、所有失效原因都有映射与文案。
+- **release.sh**：单测步骤原先 `| tail -1` 把失败退出码吞掉了（测试挂了发布流程照样继续），现在失败即中止并打印末尾日志；本仓库的版本号同步也确认覆盖 Makefile / 两个 builder / 测试。
+- 86/86 测试通过；三平台（24.10 ipk / 18.06 ipk / 25.12 apk）docker 安装验证通过。
+
+## 1.9.6 - 2026-09-09
+
+- **六个未关闭的 openwrt-ai 线程修复**：
+  - **Makefile conffiles**：恢复 `/etc/config/wificalling-gateway` 声明，opkg/apk 升级不再用包内默认值覆盖用户的节点凭据与设备策略。
+  - **Makefile include**：改回相对 `../../luci.mk`，绝对 `$(TOPDIR)/feeds/luci` 在 feed 目录改名时会失效。
+  - **overview.js 重复 apply**：Save 与 Save & Apply 合并到同一条 `commitAndApply()` 路径并覆写 `handleSaveApply`，一次点击只 apply 一次，不再出现两个重叠的 apply_rollback。
+  - **acl.d 租约文件**：读列表加入 `/*/dhcp.leases` glob，自定义目录下的 leasefile 可读。
+  - **dhcp-sync.sh 清理**：新增 `clear` 模式，用于移除插件托管的全部 `wfc_` host（1.9.7 起 `stop_service()` 无条件调用它）。
+  - **init.d 注释**：分隔符守卫注释改为 `f[6]/f[10]`（auxiliary 是第 10 个字段）。
+- 82/82 测试通过。
+
 ## 1.9.5 - 2026-08-26
 
 - **openwrt-ai round 22 修复**：
