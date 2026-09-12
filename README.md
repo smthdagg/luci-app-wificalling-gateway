@@ -194,6 +194,6 @@ echo "src/gz luci-app-wificalling-gateway https://smthdagg.github.io/Smthdagg-Re
 opkg update && opkg install luci-app-wificalling-gateway
 ```
 
-> 状态：目录已预留，尚未发布 OpenWrt 包；发布后本节会更新为具体版本号。
+> 状态：已发布 1.9.8；独立源目录与三平台包位于 `Smthdagg-Repo-feeds/luci-app-wificalling-gateway/`。
 >
-> Status: directory reserved, no packages published yet; this section will be updated with concrete versions once packages ship.
+> Status: version 1.9.8 is published; the standalone feed directory and three platform packages are available in `Smthdagg-Repo-feeds/luci-app-wificalling-gateway/`.
