@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.8 - 2026-09-13
+
+- **PassWall / IPv6 分流修复**：PassWall 没有 `PSW_NAT` 链时，Wificalling 不再因无条件写入该链而启动失败；缺失链会安全跳过。
+- Wificalling 的透明代理链显式排除 IPv6，避免 IPv6 流量误进入 IPv4 TPROXY 端口；普通 IPv6 继续交给 PassWall。
+- 已在 ImmortalWrt 24.10.6 Redmi AX6S 上验证 Wificalling 与 WLOC 同时运行、独立路由表并存、停止后规则和路由完整清理。
+
 ## 1.9.7 - 2026-09-11
 
 - **openwrt-ai round 30/31 修复**：
