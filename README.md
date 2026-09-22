@@ -28,7 +28,7 @@
 
 ## 功能
 
-- 支持 **AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket、Trojan 与 WireGuard** 七种节点协议。
+- 支持 **AnyTLS、Hysteria2、TUIC、VLESS Reality、VMess WebSocket、Trojan、WireGuard 与 Shadowsocks** 八种节点协议（Shadowsocks 加密方法白名单校验，与 WLOC 1.4 对齐）。
 - 支持直接粘贴 AnyTLS、Hysteria2/Hy2、TUIC、VLESS、VMess、Trojan (trojan://)、WireGuard (wg://) 分享链接，以及标准 WireGuard `[Interface]/[Peer]` 配置块；WireGuard 支持预共享密钥（PSK）。
 - **WireGuard 节点真实握手健康检查**：不用 ICMP 猜，临时起 sing-box endpoint 验证隧道握手并显示验证通过的出口 IP（60 秒缓存）；握手失败区分原因（配置缺失/超时/不可达），节点表格悬停可见。
 - **节点即时测试**：节点表格每行有「测试」按钮——WireGuard 节点立即重做一次握手测试（绕过缓存），其他协议做 TCP 探测，结果横幅显示（含出口 IP 与失败原因）。
@@ -194,6 +194,6 @@ echo "src/gz luci-app-wificalling-gateway https://smthdagg.github.io/Smthdagg-Re
 opkg update && opkg install luci-app-wificalling-gateway
 ```
 
-> 状态：已发布 1.9.8；独立源目录与三平台包位于 `Smthdagg-Repo-feeds/luci-app-wificalling-gateway/`。
+> 状态：已发布 1.10.0；独立源目录与三平台包位于 `Smthdagg-Repo-feeds/luci-app-wificalling-gateway/`。
 >
-> Status: version 1.9.8 is published; the standalone feed directory and three platform packages are available in `Smthdagg-Repo-feeds/luci-app-wificalling-gateway/`.
+> Status: version 1.10.0 is published; the standalone feed directory and three platform packages are available in `Smthdagg-Repo-feeds/luci-app-wificalling-gateway/`.

@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.10.0 - 2026-09-21
+
+- **WLOC 1.4.0 wificalling 组件同步**（保留 standalone 领先的修复，不回退任何一轮评审成果）：
+  - **多隧道通道跟踪**（monitor.sh）：双卡/多 ePDG 手机的每条 WFC 隧道独立展示——状态负载新增 `channels[]`、`channel_count`、`epdg_ips[]`，按通道统计包数（NAT-T 优先于 IKE），UI 逐通道渲染。conntrack 无 SIM/SA 标识，去重的 ePDG IP 是安全可观测的通道数。
+  - **Shadowsocks 协议支持**：init.d（`method` 字段 + credential 分派 + delimiter 守卫）、compiler（加密方法白名单，不支持的方法/空方法可读报错）、overview.js（modal 字段 + 白名单校验）、i18n 两条新文案。
+  - **IPv6 跟随隧道**：所有设备策略绑定同一节点时，编译出 `wfc-tcp6`/`wfc-udp6` 入站与 v6 路由规则；firewall.sh 按 **MAC**（静态 DHCP 租约 → 邻居表）匹配策略设备的 v6 流量进隧道（SLAAC 隐私扩展导致 v6 地址动态，只能按 MAC 匹配），本地链路/ULA 保持本地，其余**丢弃**——绝不留在 WAN 上。nft 语法经容器实测（`tproxy ip/ip6` 需显式 family，multicast 与 ULA 区间冲突已规避）。
+  - **node-health 轮询单节点**：monitor-loop 用游标文件每轮只刷新一个节点的探测（10 秒节奏），其余节点从 60 秒缓存读取或报 "not yet checked"——大节点列表不再同一时刻轰击所有服务器。
+  - **择优合并**：dhcp-sync 严格 IPv4 校验（逐段 0-255）、passwall-bypass 命令简化、monitor.sh 对 procd TERM 立即退出（不再拖到 kill 超时）、`event_tmp` 清理、conntrack `dst` 空值跳过。
+  - **保留 standalone 独有**（WLOC 无）：`old_hs` 独立防抖时钟（round-20）、首次 tick 基线守卫（round-30）、`probe_url`、WG 握手验证（WLOC 1.4 退化为纯 ICMP，此处不跟进）、acl 的 node_test 权限与 service-health。
+- **测试**：新增多通道跟踪、SS 出站 + v6 隧道、坏加密方法拒绝、空 method 拒绝共 6 个用例；v6 tproxy 断言同步到新语法。
+- `PKG_VERSION` 1.9.8 → 1.10.0（minor：新增协议与 v6 能力）。
+
+- **Round-36 评审修复**（openwrt-ai 8 条发现 + 1 个自查 latent bug）：
+  - **firewall.sh 多设备 MAC 列表**：`mac_for_ip` 补换行输出——原先两个策略设备的 MAC 拼成非法 token（`aa:..:01aa:..:02`），nft 整表语法错误。
+  - **firewall.sh 空 MAC 集合**：无任何设备可解析出 MAC 时回退为空集合 `set macs { type ether_addr; }`，不再生成 `elements = {  }` 语法错误导致整个规则集（含 IPv4 TPROXY）启动失败。
+  - **firewall.sh 租约文件/桥设备跟随 UCI**：读 `dhcp.@dnsmasq[0].leasefile` 与 `network.lan.device`（回退 ifname、br-lan），与 dhcp-sync/overview.js 一致。
+  - **firewall.sh neigh 查询字段错位**（自查，评审未发现，AX6S 真机验证）：`ip neigh` 输出中 `lladdr` 在第 4 字段，原 `$2 == "lladdr"` 在真机上永远匹配不到——改为按位置无关扫描。
+  - **node-health 轮转误报**：ICMP/TCP 探测现在也写 `/tmp/wg-health-<id>` 缓存（5 行格式，第 4/5 行记 verdict 与探测类型），轮转跳过分支改读缓存——非 WireGuard 节点不再在非目标轮显示 "not yet checked"。
+  - **node-health**：Shadowsocks 加入 TCP 探测回退列表（ICMP 被过滤的 SS 节点不再误报）。
+  - **monitor-loop**：删除无读者的 `tick` 变量；轮询节奏注释改为真实语义（N 节点 = N×5 秒，>12 节点超过 60 秒缓存寿命）。
+  - **overview.js**：Shadowsocks 加密方法为空时在表单即拒绝（复用既有"不支持"文案，不新增 msgid）——原先能保存但 compiler 拒绝启动。
+  - 测试 +5：MAC 逗号拼接、空集合回退、ICMP/TCP 缓存写入、轮转跳过分支读缓存、WG 格式残留缓存。
+
 ## 1.9.8 - 2026-09-13
 
 - **PassWall / IPv6 分流修复**：PassWall 没有 `PSW_NAT` 链时，Wificalling 不再因无条件写入该链而启动失败；缺失链会安全跳过。

@@ -28,7 +28,7 @@ The screenshot proves the handset reached the Wi-Fi Calling registration state; 
 
 ## Features
 
-- **Seven node protocols**: AnyTLS, Hysteria2, TUIC, VLESS Reality, VMess WebSocket, Trojan and WireGuard.
+- **Eight node protocols**: AnyTLS, Hysteria2, TUIC, VLESS Reality, VMess WebSocket, Trojan, WireGuard and Shadowsocks (cipher whitelist, aligned with WLOC 1.4).
 - Paste-import for AnyTLS, Hysteria2/Hy2, TUIC, VLESS, VMess, Trojan (`trojan://`) and WireGuard (`wg://`) share links, plus standard WireGuard `[Interface]/[Peer]` config blocks, with local browser-side parsing; WireGuard preshared keys (PSK) are supported.
 - **Real WireGuard handshake health checks**: instead of guessing from ICMP, a temporary sing-box endpoint verifies the tunnel handshake and reports the verified exit IP (60 s cache); failed handshakes carry a reason (missing config / timeout / unreachable) shown as a tooltip in the node table.
 - **Per-node instant test**: every node row has a "Test" button — WireGuard nodes re-run a fresh handshake immediately (bypassing the cache), other protocols get a TCP probe, and the result (exit IP or failure reason) is shown as a banner.
