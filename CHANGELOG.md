@@ -23,6 +23,8 @@
   - **overview.js**：Shadowsocks 加密方法为空时在表单即拒绝（复用既有"不支持"文案，不新增 msgid）——原先能保存但 compiler 拒绝启动。
   - 测试 +5：MAC 逗号拼接、空集合回退、ICMP/TCP 缓存写入、轮转跳过分支读缓存、WG 格式残留缓存。
 
+- **Round-37 评审修复**（openwrt-ai 1 条发现）：ICMP/TCP verdict 不再复用 `/tmp/wg-health-<id>`（与 WG 握手缓存格式冲突：协议切到 wireguard 后 60 秒内会把缓存的延迟当出口 IP 报 handshake_ok）——改为独立路径 `/tmp/wg-health-<id>.probe`（ts/verdict/探测类型/延迟），读写都遵守 60 秒寿命；测试 +1（过期缓存用例）+ 断言改到新路径。
+
 ## 1.9.8 - 2026-09-13
 
 - **PassWall / IPv6 分流修复**：PassWall 没有 `PSW_NAT` 链时，Wificalling 不再因无条件写入该链而启动失败；缺失链会安全跳过。
