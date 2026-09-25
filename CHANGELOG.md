@@ -25,6 +25,8 @@
 
 - **Round-37 评审修复**（openwrt-ai 1 条发现）：ICMP/TCP verdict 不再复用 `/tmp/wg-health-<id>`（与 WG 握手缓存格式冲突：协议切到 wireguard 后 60 秒内会把缓存的延迟当出口 IP 报 handshake_ok）——改为独立路径 `/tmp/wg-health-<id>.probe`（ts/verdict/探测类型/延迟），读写都遵守 60 秒寿命；测试 +1（过期缓存用例）+ 断言改到新路径。
 
+- **Round-38 评审修复**（openwrt-ai 1 条发现 + 1 个 nit）：`.probe` 轮转跳过分支去掉固定 60 秒年龄门——轮转每 N×5 秒必然刷新缓存，固定门会让 >12 节点的机队在周期尾部翻回 not_yet_checked（正是缓存要解决的问题），且与 WireGuard 跳过分支（无年龄门）不一致；现在无条件提供最近一次读数。monitor-loop 注释同步改写；删除死变量 `cache_verdict`；测试改为断言过期缓存提供最近读数。
+
 ## 1.9.8 - 2026-09-13
 
 - **PassWall / IPv6 分流修复**：PassWall 没有 `PSW_NAT` 链时，Wificalling 不再因无条件写入该链而启动失败；缺失链会安全跳过。
